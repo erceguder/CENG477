@@ -1,4 +1,14 @@
 all:
 	g++ *.cpp -o raytracer -std=c++11 -O3
-run:
+
+simple:
 	./raytracer sample_scenes/inputs/simple.xml
+
+bunny:
+	./raytracer sample_scenes/inputs/bunny.xml
+
+killeroo:
+	./raytracer sample_scenes/inputs/killeroo.xml
+
+clear:
+	rm -rf *.ppm

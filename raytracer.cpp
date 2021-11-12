@@ -18,6 +18,56 @@ Scene scene;
 unsigned char* image;
 Camera camera;
 
+float determinant(float matrix[3][3]){
+    float result = matrix[0][0] * (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2]);
+    result += matrix[0][1] * (matrix[2][0]*matrix[1][2] - matrix[1][0]*matrix[2][2]);
+    result += matrix[0][2] * (matrix[1][0]*matrix[2][1] - matrix[2][0]*matrix[1][1]);
+
+    return result;
+}
+
+bool triangle_intersects(Vec3f direction, Triangle triangle){
+
+    Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
+    Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
+    Vec3f c = scene.vertex_data[triangle.indices.v2_id - 1];
+
+    float A[3][3] = {
+        {(a-b).x, (a-c).x, direction.x},
+        {(a-b).y, (a-c).y, direction.y},
+        {(a-b).z, (a-c).z, direction.z}
+    };
+
+    float A_1[3][3] = {
+        {(a-camera.position).x, (a-c).x, direction.x},
+        {(a-camera.position).y, (a-c).y, direction.y},
+        {(a-camera.position).z, (a-c).z, direction.z}
+    };
+
+    float A_2[3][3] = {
+        {(a-b).x, (a-camera.position).x, direction.x},
+        {(a-b).y, (a-camera.position).y, direction.y},
+        {(a-b).z, (a-camera.position).z, direction.z}
+    };
+
+    float A_3[3][3] = {
+        {(a-b).x, (a-c).x, (a-camera.position).x},
+        {(a-b).y, (a-c).y, (a-camera.position).y},
+        {(a-b).z, (a-c).z, (a-camera.position).z}
+    };
+
+    float det_A = determinant(A);
+    
+    float beta = determinant(A_1) / det_A;
+    float gamma = determinant(A_2) / det_A;
+    float t = determinant(A_3) / det_A;
+
+    if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)     /* What if another object is in front of this triangle */ 
+        return true;
+    
+    return false;
+}
+
 void* trace_routine(void* row_borders){
     /*
         row_borders:    first and the last rows of the image for the thread to work on
@@ -41,23 +91,27 @@ void* trace_routine(void* row_borders){
     Vec3f u = camera.gaze * camera.up;                                  // u = (-w) x v
     Vec3f q = m + (u * left) + (camera.up * top);                       // q = m + u*l + v*t
 
-    for (int j=start_row; j <= end_row; j++){                            // rows [start, end]
+    for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
         for (int i=0; i < image_width; i++){                            // columns
+            
+            bool intersects = false;
             
             float s_u = (i + .5) * pixel_width;
             float s_v = (j + .5) * pixel_height;
 
             Vec3f s = q + (u * s_u) - (camera.up * s_v);            // s = q + u * s_u - v * s_v
             
-            Ray primaryRay(camera.position, s - camera.position);   // d = s - e
+            Vec3f direction = s - camera.position;                  // d = s - e
+
+            Ray primaryRay(camera.position, direction);             // NOT USED?
 
             for (auto sphere: scene.spheres){
 
                 Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
 
-                Vec3f o_minus_c = camera.position - center;                                     // o - c
-                float d_dot_o_minus_c = primaryRay.getDirection().dot(o_minus_c);               // d . (o - c)
-                float d_dot_d = primaryRay.getDirection().dot(primaryRay.getDirection());       // d . d
+                Vec3f o_minus_c = camera.position - center;                     // o - c
+                float d_dot_o_minus_c = direction.dot(o_minus_c);               // d . (o - c)
+                float d_dot_d = direction.dot(direction);                       // d . d
 
                 float sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(sphere.radius, 2)) );
 
@@ -70,12 +124,42 @@ void* trace_routine(void* row_borders){
                     image[start_index++] = 255;
                     image[start_index++] = 255;
                     image[start_index++] = 255;
+
+                    intersects = true;
                 }
-                else{
-                    image[start_index++] = 0;
-                    image[start_index++] = 0;
-                    image[start_index++] = 0;
+            }
+
+            for (auto triangle: scene.triangles){
+                
+                if (triangle_intersects(direction, triangle)){
+                    image[start_index++] = 255;
+                    image[start_index++] = 255;
+                    image[start_index++] = 255;
+             
+                    intersects = true;
                 }
+            }
+
+            for (auto mesh: scene.meshes){
+                for (auto face: mesh.faces){
+                    
+                    Triangle triangle = {mesh.material_id, face};
+
+                    if (triangle_intersects(direction, triangle)){
+                        image[start_index++] = 255;
+                        image[start_index++] = 255;
+                        image[start_index++] = 255;
+                        
+                        intersects = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!intersects){
+                image[start_index++] = scene.background_color.x;
+                image[start_index++] = scene.background_color.y;
+                image[start_index++] = scene.background_color.z;
             }
         }
     }
@@ -92,6 +176,7 @@ int main(int argc, char* argv[])
         camera = scene.cameras[i];
         image = new unsigned char [camera.image_width * camera.image_height * 3];
 
+        /* This assumes image height is a factor of 4 */
         int row_borders[4][2] = {
             {0, (camera.image_height/4) - 1},
             {camera.image_height/4, 2*(camera.image_height/4) - 1},
@@ -109,7 +194,7 @@ int main(int argc, char* argv[])
         pthread_join(threads[2], NULL);
         pthread_join(threads[3], NULL);
         
-        write_ppm("deneme.ppm", image, camera.image_width, camera.image_height);
+        write_ppm(camera.image_name.c_str(), image, camera.image_width, camera.image_height);
 
         delete [] image;
     }
