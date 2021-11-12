@@ -12,10 +12,10 @@ Ray::Ray(Vec3f origin, Vec3f direction){
     this->direction = direction;
 }
 
-Vec3f Ray::getOrigin(){ return this->o; }
+Vec3f Ray::getOrigin(){ return this->origin; }
 
-Vec3f Ray::getDirection(){ return this->d; }
+Vec3f Ray::getDirection(){ return this->direction; }
 
-void Ray::setOrigin(Vec3f origin) {this->o = origin; }
+void Ray::setOrigin(Vec3f origin) {this->origin = origin; }
 
-void Ray::setDirection(Vec3f direction) { this->d = direction; }
+void Ray::setDirection(Vec3f direction) { this->direction = direction; }

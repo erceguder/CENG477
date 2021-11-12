@@ -35,6 +35,11 @@ int main(int argc, char* argv[])
         {   0,   0,   0 },  // Black
     };
 
+    for (auto camera: scene.cameras){
+
+        
+    }
+
     int width = 640, height = 480;
     int columnWidth = width / 8;
 
