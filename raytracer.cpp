@@ -1,8 +1,8 @@
 #include <iostream>
 #include "parser.h"
 #include "ppm.h"
-#include "vec3f.h"
 #include "ray.h"
+#include "vec3f.h"
 #include "vec3i.h"
 
 typedef unsigned char RGB[3];
@@ -58,8 +58,7 @@ int main(int argc, char* argv[])
     Vec3i vec2(3, 0, 1);
     // cout << (vec1.dotProduct(vec2)).getX() << " " << vec1.dotProduct(vec2).getY() << " " << vec1.dotProduct(vec2).getZ() << endl;
     // cout << vec1.dotProduct(vec2) << endl;
-    cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << endl;
-
+    // cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << endl;
     
 
     // Ray ray(vec1, vec2);

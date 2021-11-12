@@ -5,17 +5,17 @@
 
 class Ray
 {
-    Vec3f o, d;
+    Vec3f origin, direction;
 
     public:
         Ray();
         Ray(Vec3f origin, Vec3f direction);
 
-        Vec3f getO();
-        Vec3f getD();
+        Vec3f getOrigin();
+        Vec3f getDirection();
 
-        void setO(Vec3f origin);
-        void setD(Vec3f direction);
+        void setOrigin(Vec3f origin);
+        void setDirection(Vec3f direction);
 
 
 };
