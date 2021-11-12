@@ -1,10 +1,10 @@
 #include "vec3f.h"
 
-float Vec3f::getX(){ return this->x; }
+float const Vec3f::getX(){ return this->x; }
 
-float Vec3f::getY(){ return this->y; }
+float const Vec3f::getY(){ return this->y; }
 
-float Vec3f::getZ(){ return this->z; }
+float const Vec3f::getZ(){ return this->z; }
 
 void Vec3f::setX(float cx) { this->x = cx; }
 
@@ -48,3 +48,7 @@ float Vec3f::dotProduct(Vec3f obj){
     return this->getX() * obj.getX() + this->getY() * obj.getY() + this->getZ() * obj.getZ();
 }
 
+ostream& operator<<(ostream& os, const Vec3f& vec){
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return os;
+}

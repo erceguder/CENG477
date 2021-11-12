@@ -37,10 +37,19 @@ int main(int argc, char* argv[])
 
     for (auto camera: scene.cameras){
 
+        int width = camera.image_width, height = camera.image_height;
+        unsigned char* image = new unsigned char [width * height * 3];
         
+        for (int j=0; j < height; j++){         // rows
+            for (int i=0; i < width; i++){      // columns
+                
+                //Ray primaryRay(camera.position, )
+
+            }
+        }
     }
 
-    int width = 640, height = 480;
+    /*
     int columnWidth = width / 8;
 
     unsigned char* image = new unsigned char [width * height * 3];
@@ -56,16 +65,26 @@ int main(int argc, char* argv[])
             image[i++] = BAR_COLOR[colIdx][2];
         }
     }
+    
 
     write_ppm("test.ppm", image, width, height);
-
+    
     Vec3i vec1(3,7,1);
     Vec3i vec2(3, 0, 1);
     // cout << (vec1.dotProduct(vec2)).getX() << " " << vec1.dotProduct(vec2).getY() << " " << vec1.dotProduct(vec2).getZ() << endl;
     // cout << vec1.dotProduct(vec2) << endl;
     // cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << endl;
     
+    Ray deneme;
 
+    cout << deneme.getDirection() << ", " << deneme.getOrigin() << endl;
+
+    Vec3f orig(3, 4, 5), dest(6, 8, 10);
+
+    Ray deneme2(orig, dest);
+
+    cout << deneme2.getDirection() << ", " << deneme2.getOrigin() << endl;
+    */
     // Ray ray(vec1, vec2);
     // ray.setO(vec1);
     // ray.setD(vec2);

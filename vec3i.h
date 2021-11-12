@@ -1,6 +1,9 @@
 #ifndef __VEC3I_H__
 #define __VEC3I_H__
 
+#include <iostream>
+using namespace std;
+
 class Vec3i
 {
 
@@ -10,9 +13,9 @@ public:
 
     Vec3i(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
 
-    int getX();
-    int getY();
-    int getZ();
+    int const getX();
+    int const getY();
+    int const getZ();
 
     void setX(int cx);
     void setY(int cy);
@@ -25,7 +28,7 @@ public:
     Vec3i scalarMultiplication(int c);
     int dotProduct(Vec3i obj);        
     
-    
+    friend ostream& operator<<(ostream& os, const Vec3i& vec);
 };
 
 

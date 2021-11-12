@@ -1,10 +1,10 @@
 #include "vec3i.h"
 
-int Vec3i::getX(){ return this->x; }
+int const Vec3i::getX(){ return this->x; }
 
-int Vec3i::getY(){ return this->y; }
+int const Vec3i::getY(){ return this->y; }
 
-int Vec3i::getZ(){ return this->z; }
+int const Vec3i::getZ(){ return this->z; }
 
 void Vec3i::setX(int cx) { this->x = cx; }
 
@@ -46,4 +46,9 @@ Vec3i Vec3i::scalarMultiplication(int c){
 
 int Vec3i::dotProduct(Vec3i obj){
     return this->getX() * obj.getX() + this->getY() * obj.getY() + this->getZ() * obj.getZ();
+}
+
+ostream& operator<<(ostream& os, const Vec3i& vec){
+    os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
+    return os;
 }

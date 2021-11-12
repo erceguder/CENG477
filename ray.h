@@ -11,13 +11,11 @@ class Ray
         Ray();
         Ray(Vec3f origin, Vec3f direction);
 
-        Vec3f getOrigin();
-        Vec3f getDirection();
+        Vec3f const getOrigin();
+        Vec3f const getDirection();
 
         void setOrigin(Vec3f origin);
         void setDirection(Vec3f direction);
-
-
 };
 
 
