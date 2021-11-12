@@ -4,91 +4,93 @@
 #include "ray.h"
 #include "vec3f.h"
 #include "vec3i.h"
+#include <cmath>
+#include<pthread.h>
+
+#define THREAD_NUM 4
 
 typedef unsigned char RGB[3];
 
 using namespace std;
+using namespace parser;
 
-int main(int argc, char* argv[])
-{
-    // Sample usage for reading an XML scene file
-    parser::Scene scene;
+Scene scene;
 
-    scene.loadFromXml(argv[1]);
+void trace_rays(unsigned char* image, Camera camera, int start_index, int row_borders[2]){
+    /*
+        image:          image array
+        camera:         camera object
+        start_index:    starting index for the thread to write on the image
+        row_borders:    first and the last rows of the image for the thread to work on
+    */
 
-    // The code below creates a test pattern and writes
-    // it to a PPM file to demonstrate the usage of the
-    // ppm_write function.
-    //
-    // Normally, you would be running your ray tracing
-    // code here to produce the desired image.
+    int image_width = camera.image_width, image_height = camera.image_width;
 
-    const RGB BAR_COLOR[8] =
-    {
-        { 255, 255, 255 },  // 100% White
-        { 255, 255,   0 },  // Yellow
-        {   0, 255, 255 },  // Cyan
-        {   0, 255,   0 },  // Green
-        { 255,   0, 255 },  // Magenta
-        { 255,   0,   0 },  // Red
-        {   0,   0, 255 },  // Blue
-        {   0,   0,   0 },  // Black
-    };
+    float left = camera.near_plane.x;
+    float right = camera.near_plane.y;
+    float bottom = camera.near_plane.z;
+    float top = camera.near_plane.w;
 
-    for (auto camera: scene.cameras){
+    float pixel_width = (right - left) / image_width;
+    float pixel_height = (top - bottom) / image_height;
 
-        int width = camera.image_width, height = camera.image_height;
-        unsigned char* image = new unsigned char [width * height * 3];
-        
-        for (int j=0; j < height; j++){         // rows
-            for (int i=0; i < width; i++){      // columns
-                
-                //Ray primaryRay(camera.position, )
+    Vec3f m = camera.position + (camera.gaze * camera.near_distance);   // m = e + gaze*distance
+    Vec3f u = camera.gaze * camera.up;                                  // u = (-w) x v
+    Vec3f q = m + (u * left) + (camera.up * top);                       // q = m + u*l + v*t
 
+    for (int j=row_borders[0]; j < row_borders[1]; j++){        // rows [start, end)
+        for (int i=0; i < image_width; i++){                    // columns
+            
+            float s_u = (i + .5) * pixel_width;
+            float s_v = (j + .5) * pixel_height;
+
+            Vec3f s = q + (u * s_u) - (camera.up * s_v);            // s = q + u * s_u - v * s_v
+            
+            Ray primaryRay(camera.position, s - camera.position);   // d = s - e
+
+            for (auto sphere: scene.spheres){
+
+                Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
+
+                Vec3f o_minus_c = camera.position - center;                                     // o - c
+                float d_dot_o_minus_c = primaryRay.getDirection().dot(o_minus_c);               // d . (o - c)
+                float d_dot_d = primaryRay.getDirection().dot(primaryRay.getDirection());       // d . d
+
+                float sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(sphere.radius, 2)) );
+
+                if (!isnan(sqrt_discr)){  // ray and sphere intersect
+                    float t_1 = (-d_dot_o_minus_c - sqrt_discr) / d_dot_d;
+                    float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
+
+                    //cout << "t_1: " << t_1 << ", t_2: " << t_2 << endl;
+
+                    image[start_index++] = 255;
+                    image[start_index++] = 255;
+                    image[start_index++] = 255;
+                }
+                else{
+                    image[start_index++] = 0;
+                    image[start_index++] = 0;
+                    image[start_index++] = 0;
+                }
             }
         }
     }
+}
 
-    /*
-    int columnWidth = width / 8;
+int main(int argc, char* argv[])
+{
+    scene.loadFromXml(argv[1]);
 
-    unsigned char* image = new unsigned char [width * height * 3];
+    pthread_t threads[THREAD_NUM];
 
-    int i = 0;
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
-            int colIdx = x / columnWidth;
-            image[i++] = BAR_COLOR[colIdx][0];
-            image[i++] = BAR_COLOR[colIdx][1];
-            image[i++] = BAR_COLOR[colIdx][2];
-        }
+    for (auto camera: scene.cameras){
+
+        unsigned char* image = new unsigned char [camera.image_width * camera.image_height * 3];
+        
+        //pthread_create(&threads[0], NULL, trace_rays, );
+        
+        write_ppm("deneme.ppm", image, camera.image_width, camera.image_height);
+        delete [] image;
     }
-    
-
-    write_ppm("test.ppm", image, width, height);
-    
-    Vec3i vec1(3,7,1);
-    Vec3i vec2(3, 0, 1);
-    // cout << (vec1.dotProduct(vec2)).getX() << " " << vec1.dotProduct(vec2).getY() << " " << vec1.dotProduct(vec2).getZ() << endl;
-    // cout << vec1.dotProduct(vec2) << endl;
-    // cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << endl;
-    
-    Ray deneme;
-
-    cout << deneme.getDirection() << ", " << deneme.getOrigin() << endl;
-
-    Vec3f orig(3, 4, 5), dest(6, 8, 10);
-
-    Ray deneme2(orig, dest);
-
-    cout << deneme2.getDirection() << ", " << deneme2.getOrigin() << endl;
-    */
-    // Ray ray(vec1, vec2);
-    // ray.setO(vec1);
-    // ray.setD(vec2);
-
-    // cout << ray.getD().getX() << " " << ray.getD().getY() << " " << ray.getD().getZ() << endl;
-
 }

@@ -4,11 +4,14 @@
 #include <string>
 #include <vector>
 
+#include "vec3f.h"
+#include "vec3i.h"
+
 namespace parser
 {
     //Notice that all the structures are as simple as possible
     //so that you are not enforced to adopt any style or design.
-    struct Vec3f
+    /*struct Vec3f
     {
         float x, y, z;
     };
@@ -17,11 +20,12 @@ namespace parser
     {
         int x, y, z;
     };
-
+    */
     struct Vec4f
     {
-        float x, y, z, w;
+        float x, y, z, w;   // Left, right, bottom, top
     };
+    
 
     struct Camera
     {

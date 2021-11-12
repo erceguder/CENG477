@@ -6,29 +6,19 @@ using namespace std;
 
 class Vec3i
 {
+    public:
+        int x, y, z;
 
-    int x, y, z;
+        Vec3i(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
 
-public:
+        Vec3i operator+(Vec3i &obj);
+        Vec3i operator-(Vec3i &obj);
+        Vec3i operator*(Vec3i &obj);    // cross product
 
-    Vec3i(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
-
-    int const getX();
-    int const getY();
-    int const getZ();
-
-    void setX(int cx);
-    void setY(int cy);
-    void setZ(int cz);
-
-    Vec3i operator+(Vec3i &obj);
-    Vec3i operator-(Vec3i &obj);
-    Vec3i operator*(Vec3i &obj);    // cross product
-
-    Vec3i scalarMultiplication(int c);
-    int dotProduct(Vec3i obj);        
-    
-    friend ostream& operator<<(ostream& os, const Vec3i& vec);
+        Vec3i scalarMultiplication(int c);
+        int dotProduct(Vec3i obj);        
+        
+        friend ostream& operator<<(ostream& os, const Vec3i& vec);
 };
 
 
