@@ -1,3 +1,6 @@
 .git
 sample_scenes/
-deneme.ppm
+*.ppm
+.DS_Store
+.vscode/
+raytracer
