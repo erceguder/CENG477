@@ -1,5 +1,5 @@
-#ifndef __utilities_h__
-#define __utilities_h__
+#ifndef __UTILITIES_H__
+#define __UTILITIES_H__
 
 typedef struct
 {

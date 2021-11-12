@@ -1,5 +1,5 @@
-#ifndef __vec3i_h__
-#define __vec3i_h__
+#ifndef __VEC3I_H__
+#define __VEC3I_H__
 
 class Vec3i
 {

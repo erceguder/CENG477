@@ -1,5 +1,5 @@
-#ifndef __ray_h__
-#define __ray_h__
+#ifndef __RAY_H__
+#define __RAY_H__
 
 #include "vec3f.h"
 
