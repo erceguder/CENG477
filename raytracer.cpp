@@ -15,16 +15,19 @@ using namespace std;
 using namespace parser;
 
 Scene scene;
+unsigned char* image;
+Camera camera;
 
-void trace_rays(unsigned char* image, Camera camera, int start_index, int row_borders[2]){
+void* trace_routine(void* row_borders){
     /*
-        image:          image array
-        camera:         camera object
-        start_index:    starting index for the thread to write on the image
         row_borders:    first and the last rows of the image for the thread to work on
     */
+    int start_row = ((int*) row_borders)[0];
+    int end_row = ((int*) row_borders)[1];
 
-    int image_width = camera.image_width, image_height = camera.image_width;
+    int image_width = camera.image_width, image_height = camera.image_height;
+
+    int start_index = start_row * image_width * 3;
 
     float left = camera.near_plane.x;
     float right = camera.near_plane.y;
@@ -38,8 +41,8 @@ void trace_rays(unsigned char* image, Camera camera, int start_index, int row_bo
     Vec3f u = camera.gaze * camera.up;                                  // u = (-w) x v
     Vec3f q = m + (u * left) + (camera.up * top);                       // q = m + u*l + v*t
 
-    for (int j=row_borders[0]; j < row_borders[1]; j++){        // rows [start, end)
-        for (int i=0; i < image_width; i++){                    // columns
+    for (int j=start_row; j <= end_row; j++){                            // rows [start, end]
+        for (int i=0; i < image_width; i++){                            // columns
             
             float s_u = (i + .5) * pixel_width;
             float s_v = (j + .5) * pixel_height;
@@ -84,13 +87,30 @@ int main(int argc, char* argv[])
 
     pthread_t threads[THREAD_NUM];
 
-    for (auto camera: scene.cameras){
+    for (int i=0; i < scene.cameras.size(); i++){
 
-        unsigned char* image = new unsigned char [camera.image_width * camera.image_height * 3];
-        
-        //pthread_create(&threads[0], NULL, trace_rays, );
+        camera = scene.cameras[i];
+        image = new unsigned char [camera.image_width * camera.image_height * 3];
+
+        int row_borders[4][2] = {
+            {0, (camera.image_height/4) - 1},
+            {camera.image_height/4, 2*(camera.image_height/4) - 1},
+            {2*(camera.image_height/4), 3*(camera.image_height/4) - 1},
+            {3*(camera.image_height/4), 4*(camera.image_height/4) - 1}
+        };
+
+        pthread_create(&threads[0], NULL, trace_routine, row_borders[0]);
+        pthread_create(&threads[1], NULL, trace_routine, row_borders[1]);
+        pthread_create(&threads[2], NULL, trace_routine, row_borders[2]);
+        pthread_create(&threads[3], NULL, trace_routine, row_borders[3]);
+
+        pthread_join(threads[0], NULL);
+        pthread_join(threads[1], NULL);
+        pthread_join(threads[2], NULL);
+        pthread_join(threads[3], NULL);
         
         write_ppm("deneme.ppm", image, camera.image_width, camera.image_height);
+
         delete [] image;
     }
 }
