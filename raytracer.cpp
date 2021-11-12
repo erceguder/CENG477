@@ -7,6 +7,8 @@
 
 typedef unsigned char RGB[3];
 
+using namespace std;
+
 int main(int argc, char* argv[])
 {
     // Sample usage for reading an XML scene file
@@ -54,15 +56,16 @@ int main(int argc, char* argv[])
 
     Vec3i vec1(3,7,1);
     Vec3i vec2(3, 0, 1);
-    // std::cout << (vec1.dotProduct(vec2)).getX() << " " << vec1.dotProduct(vec2).getY() << " " << vec1.dotProduct(vec2).getZ() << std::endl;
-    // std::cout << vec1.dotProduct(vec2) << std::endl;
-    std::cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << std::endl;
+    // cout << (vec1.dotProduct(vec2)).getX() << " " << vec1.dotProduct(vec2).getY() << " " << vec1.dotProduct(vec2).getZ() << endl;
+    // cout << vec1.dotProduct(vec2) << endl;
+    cout << (vec1 * vec2).getX() << " " << (vec1 * vec2).getY() << " " << (vec1 * vec2).getZ() << endl;
 
+    
 
     // Ray ray(vec1, vec2);
     // ray.setO(vec1);
     // ray.setD(vec2);
 
-    // std::cout << ray.getD().getX() << " " << ray.getD().getY() << " " << ray.getD().getZ() << std::endl;
+    // cout << ray.getD().getX() << " " << ray.getD().getY() << " " << ray.getD().getZ() << endl;
 
 }
