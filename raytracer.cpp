@@ -5,9 +5,11 @@
 #include "vec3f.h"
 #include "vec3i.h"
 #include <cmath>
-#include<pthread.h>
+#include <pthread.h>
+#include <limits>
 
 #define THREAD_NUM 4
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 typedef unsigned char RGB[3];
 
@@ -26,7 +28,7 @@ float determinant(float matrix[3][3]){
     return result;
 }
 
-bool triangle_intersects(Vec3f direction, Triangle triangle){
+bool triangle_intersects(Vec3f direction, Triangle triangle, float min_distance){
 
     Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
     Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
@@ -63,8 +65,31 @@ bool triangle_intersects(Vec3f direction, Triangle triangle){
     float t = determinant(A_3) / det_A;
 
     if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)     /* What if another object is in front of this triangle */ 
-        return true;
-    
+        if (t < min_distance)
+            return (min_distance = t);
+        
+    return false;
+}
+
+bool sphere_intersects(Vec3f direction, Sphere sphere, float min_distance){
+
+    Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
+
+    Vec3f o_minus_c = camera.position - center;                     // o - c
+    float d_dot_o_minus_c = direction.dot(o_minus_c);               // d . (o - c)
+    float d_dot_d = direction.dot(direction);                       // d . d
+
+    float sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(sphere.radius, 2)) );
+
+    if (!isnan(sqrt_discr)){  // ray and sphere intersect
+        float t_1 = (-d_dot_o_minus_c - sqrt_discr) / d_dot_d;
+        float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
+        float t = MIN(t_1, t_2);
+
+        if (t < min_distance)
+            return (min_distance = t);
+        
+    }
     return false;
 }
 
@@ -94,6 +119,8 @@ void* trace_routine(void* row_borders){
     for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
         for (int i=0; i < image_width; i++){                            // columns
             
+            float min_distance = numeric_limits<float>::max();
+
             bool intersects = false;
             
             float s_u = (i + .5) * pixel_width;
@@ -107,31 +134,19 @@ void* trace_routine(void* row_borders){
 
             for (auto sphere: scene.spheres){
 
-                Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
-
-                Vec3f o_minus_c = camera.position - center;                     // o - c
-                float d_dot_o_minus_c = direction.dot(o_minus_c);               // d . (o - c)
-                float d_dot_d = direction.dot(direction);                       // d . d
-
-                float sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(sphere.radius, 2)) );
-
-                if (!isnan(sqrt_discr)){  // ray and sphere intersect
-                    float t_1 = (-d_dot_o_minus_c - sqrt_discr) / d_dot_d;
-                    float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
-
-                    //cout << "t_1: " << t_1 << ", t_2: " << t_2 << endl;
-
+                if(sphere_intersects(direction, sphere, min_distance)){
                     image[start_index++] = 255;
                     image[start_index++] = 255;
                     image[start_index++] = 255;
 
                     intersects = true;
                 }
+
             }
 
             for (auto triangle: scene.triangles){
                 
-                if (triangle_intersects(direction, triangle)){
+                if (triangle_intersects(direction, triangle, min_distance)){
                     image[start_index++] = 255;
                     image[start_index++] = 255;
                     image[start_index++] = 255;
@@ -145,7 +160,7 @@ void* trace_routine(void* row_borders){
                     
                     Triangle triangle = {mesh.material_id, face};
 
-                    if (triangle_intersects(direction, triangle)){
+                    if (triangle_intersects(direction, triangle, min_distance)){
                         image[start_index++] = 255;
                         image[start_index++] = 255;
                         image[start_index++] = 255;
@@ -161,6 +176,7 @@ void* trace_routine(void* row_borders){
                 image[start_index++] = scene.background_color.y;
                 image[start_index++] = scene.background_color.z;
             }
+            
         }
     }
 }
@@ -197,5 +213,6 @@ int main(int argc, char* argv[])
         write_ppm(camera.image_name.c_str(), image, camera.image_width, camera.image_height);
 
         delete [] image;
+
     }
 }
