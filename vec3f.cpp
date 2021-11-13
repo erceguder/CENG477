@@ -36,6 +36,15 @@ Vec3f Vec3f::operator*(float c){
     return res;
 }
 
+Vec3f Vec3f::unit(){
+    Vec3f res;
+    float length = sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+    res.x = this->x / length;
+    res.y = this->y / length;
+    res.z = this->z / length;
+    return res;
+}
+
 float Vec3f::dot(Vec3f obj){
     return this->x * obj.x + this->y * obj.y + this->z * obj.z;
 }

@@ -10,6 +10,7 @@
 
 #define THREAD_NUM 4
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 
 typedef unsigned char RGB[3];
 
@@ -19,6 +20,11 @@ using namespace parser;
 Scene scene;
 unsigned char* image;
 Camera camera;
+
+Vec3f diffuse_shading(Vec3f diffuse_component, Vec3f w_i, Vec3f normal, Vec3f light_intensity, float distance){
+
+
+}
 
 float determinant(float matrix[3][3]){
     float result = matrix[0][0] * (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2]);
