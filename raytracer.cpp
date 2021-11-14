@@ -71,7 +71,7 @@ float determinant(float matrix[3][3]){
     return result;
 }
 
-bool triangle_intersects(Vec3f direction, Triangle triangle, float min_distance){
+bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance){
 
     Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
     Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
@@ -108,13 +108,13 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float min_distance)
     float t = determinant(A_3) / det_A;
 
     if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)     /* What if another object is in front of this triangle */ 
-        if (t < min_distance)
-            return (min_distance = t);
+        if (t < *min_distance)
+            return (*min_distance = t);
         
     return false;
 }
 
-bool sphere_intersects(Vec3f direction, Sphere sphere, float min_distance){
+bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_distance){
 
     Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
 
@@ -129,8 +129,8 @@ bool sphere_intersects(Vec3f direction, Sphere sphere, float min_distance){
         float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
         float t = MIN(t_1, t_2);                // does it apply all the time??
 
-        if (t < min_distance)
-            return (min_distance = t);
+        if (t < *min_distance)
+            return (*min_distance = t);
         
     }
     return false;
@@ -162,7 +162,8 @@ void* trace_routine(void* row_borders){
     for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
         for (int i=0; i < image_width; i++){                            // columns
             
-            float min_distance = numeric_limits<float>::max();
+            float max_float = numeric_limits<float>::max();
+            float* min_distance = &max_float;
 
             bool intersects = false;
             
