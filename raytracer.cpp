@@ -11,6 +11,7 @@
 #define THREAD_NUM 4
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define PI 3.14159265
 
 typedef unsigned char RGB[3];
 
@@ -22,7 +23,43 @@ unsigned char* image;
 Camera camera;
 
 Vec3f diffuse_shading(Vec3f diffuse_component, Vec3f w_i, Vec3f normal, Vec3f light_intensity, float distance){
+    Vec3f wi = w_i.normalize();
+    Vec3f n = normal.normalize();                   // two lines can be omitted if parameters are given normalized
 
+    float cos_theta = MAX(0, wi.dot(n));
+    Vec3f i_over_r_squared = light_intensity * (1/(distance * distance));           // I/(r^2)
+    Vec3f res = (diffuse_component * cos_theta).elementviseMultiplication(i_over_r_squared);
+
+    return res;
+}
+
+Vec3f ambient_shading(Vec3f ambient_component, Vec3f light_intensity){
+    Vec3f res = ambient_component.elementviseMultiplication(light_intensity);
+    
+    return res;
+}
+
+Vec3f specular_shading(Vec3f specular_component, int phong_exponent, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
+    Vec3f res;
+    
+    Vec3f wi = w_i.normalize();
+    Vec3f wo = w_o.normalize();
+    Vec3f n = normal.normalize();
+
+    float cos_theta = wi.dot(n) * (1/(wi.length() * n.length()));       // if the light is coming from behind the surface
+    float theta = acos(cos_theta) * 180.0 / PI;
+    if (theta >= 90)
+        return res;
+    
+    Vec3f wi_plus_wo = wi + wo;
+    Vec3f half = wi_plus_wo * (1/wi_plus_wo.length());
+
+    float cos_alpha = pow(MAX(0, n.dot(half)), phong_exponent);
+    Vec3f i_over_rsqured = light_intensity * (1/(distance * distance));
+    
+    res = (specular_component * cos_alpha).elementviseMultiplication(i_over_rsqured);
+
+    return res;
 
 }
 
@@ -90,7 +127,7 @@ bool sphere_intersects(Vec3f direction, Sphere sphere, float min_distance){
     if (!isnan(sqrt_discr)){  // ray and sphere intersect
         float t_1 = (-d_dot_o_minus_c - sqrt_discr) / d_dot_d;
         float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
-        float t = MIN(t_1, t_2);
+        float t = MIN(t_1, t_2);                // does it apply all the time??
 
         if (t < min_distance)
             return (min_distance = t);
@@ -141,6 +178,9 @@ void* trace_routine(void* row_borders){
             for (auto sphere: scene.spheres){
 
                 if(sphere_intersects(direction, sphere, min_distance)){
+                    // TODO: L = L_a + \sum_0^l (L_d + L_s)
+                    // TODO: clamp and discretize pixel values
+
                     image[start_index++] = 255;
                     image[start_index++] = 255;
                     image[start_index++] = 255;
@@ -153,6 +193,9 @@ void* trace_routine(void* row_borders){
             for (auto triangle: scene.triangles){
                 
                 if (triangle_intersects(direction, triangle, min_distance)){
+                    // TODO: L = L_a + \sum_0^l (L_d + L_s)
+                    // TODO: clamp and discretize pixel values
+
                     image[start_index++] = 255;
                     image[start_index++] = 255;
                     image[start_index++] = 255;
@@ -167,6 +210,9 @@ void* trace_routine(void* row_borders){
                     Triangle triangle = {mesh.material_id, face};
 
                     if (triangle_intersects(direction, triangle, min_distance)){
+                        // TODO: L = L_a + \sum_0^l (L_d + L_s)
+                        // TODO: clamp and discretize pixel values
+
                         image[start_index++] = 255;
                         image[start_index++] = 255;
                         image[start_index++] = 255;
@@ -188,7 +234,7 @@ void* trace_routine(void* row_borders){
 }
 
 int main(int argc, char* argv[])
-{
+{   
     scene.loadFromXml(argv[1]);
 
     pthread_t threads[THREAD_NUM];
