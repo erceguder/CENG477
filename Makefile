@@ -10,5 +10,8 @@ bunny:
 killeroo:
 	./raytracer sample_scenes/inputs/killeroo.xml
 
+cornellbox: 
+	./raytracer sample_scenes/inputs/cornellbox.xml
+
 clear:
 	rm -rf *.ppm
