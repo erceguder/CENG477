@@ -22,6 +22,48 @@ Scene scene;
 unsigned char* image;
 Camera camera;
 
+void computeNormals(){
+
+    int triangles_size = scene.triangles.size();
+    for (int i=0; i<triangles_size; i++){
+        Face indices = scene.triangles[i].indices;
+
+        Vec3f v0 = scene.vertex_data[indices.v0_id-1];
+        Vec3f v1 = scene.vertex_data[indices.v1_id-1];
+        Vec3f v2 = scene.vertex_data[indices.v2_id-1];                  // vertices of the triangle
+
+        // cout << v0 << ", " << v1 << ", " << v2 << endl;
+        // cout << (v2-v1) * (v0-v1) << endl;
+
+        Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
+        scene.triangles[i].normal = normal;
+    }
+
+    int meshes_size = scene.meshes.size();
+    for (int i=0; i<meshes_size; i++){
+
+        Mesh mesh = scene.meshes[i];
+
+        int faces_size = scene.meshes[i].faces.size();
+        for (int j=0; j<faces_size; j++){
+            
+            Face indices = mesh.faces[j];
+
+            Vec3f v0 = scene.vertex_data[indices.v0_id-1];
+            Vec3f v1 = scene.vertex_data[indices.v1_id-1];
+            Vec3f v2 = scene.vertex_data[indices.v2_id-1];
+
+            // cout << v0 << ", " << v1 << ", " << v2 << endl;
+            // cout << (v2-v1) * (v0-v1) << endl;
+
+            Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
+            scene.meshes[i].normals.push_back(normal);
+
+        }
+    }
+
+}
+
 Vec3f diffuse_shading(Vec3f diffuse_component, Vec3f w_i, Vec3f normal, Vec3f light_intensity, float distance){
     Vec3f wi = w_i.normalize();
     Vec3f n = normal.normalize();                   // two lines can be omitted if parameters are given normalized
