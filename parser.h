@@ -65,6 +65,7 @@ namespace parser
     {
         int material_id;
         std::vector<Face> faces;
+        std::vector<Vec3f> normals;
     };
 
     struct Triangle
