@@ -13,5 +13,8 @@ killeroo:
 cornellbox: 
 	./raytracer sample_scenes/inputs/cornellbox.xml
 
+car:
+	./raytracer sample_scenes/inputs/car.xml
+
 clear:
 	rm -rf *.ppm
