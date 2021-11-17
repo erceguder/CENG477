@@ -36,7 +36,7 @@ void computeNormals(){
         // cout << (v2-v1) * (v0-v1) << endl;
 
         Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-        scene.triangles[i].normal = normal;
+        scene.triangles[i].indices.normal = normal;
     }
 
     int meshes_size = scene.meshes.size();
@@ -57,7 +57,7 @@ void computeNormals(){
             // cout << (v2-v1) * (v0-v1) << endl;
 
             Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-            scene.meshes[i].normals.push_back(normal);
+            scene.meshes[i].faces[j].normal = normal;
 
         }
     }
@@ -206,6 +206,8 @@ void* trace_routine(void* row_borders){
             
             float max_float = numeric_limits<float>::max();
             float* min_distance = &max_float;
+            Vec3f n;
+            Vec3f *normal = &n;                                         // normal at intersection point
 
             bool intersects = false;
             
@@ -265,7 +267,7 @@ void* trace_routine(void* row_borders){
                     }
                 }
             }
-            
+
             if (!intersects){
                 image[start_index++] = scene.background_color.x;
                 image[start_index++] = scene.background_color.y;
@@ -279,6 +281,7 @@ void* trace_routine(void* row_borders){
 int main(int argc, char* argv[])
 {   
     scene.loadFromXml(argv[1]);
+    computeNormals();
 
     pthread_t threads[THREAD_NUM];
 
