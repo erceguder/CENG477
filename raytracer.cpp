@@ -24,8 +24,10 @@ Camera camera;
 
 void computeNormals(){
 
-    int triangles_size = scene.triangles.size();
-    for (int i=0; i<triangles_size; i++){
+    int triangle_count = scene.triangles.size();
+    
+    for (int i=0; i<triangle_count; i++){
+
         Face indices = scene.triangles[i].indices;
 
         Vec3f v0 = scene.vertex_data[indices.v0_id-1];
@@ -39,8 +41,9 @@ void computeNormals(){
         scene.triangles[i].indices.normal = normal;
     }
 
-    int meshes_size = scene.meshes.size();
-    for (int i=0; i<meshes_size; i++){
+    int mesh_count = scene.meshes.size();
+
+    for (int i=0; i<mesh_count; i++){
 
         Mesh mesh = scene.meshes[i];
 
