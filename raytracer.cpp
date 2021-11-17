@@ -113,7 +113,7 @@ float determinant(float matrix[3][3]){
     return result;
 }
 
-bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance){
+bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance, Vec3f* normal){
 
     Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
     Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
@@ -150,9 +150,13 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance
     float t = determinant(A_3) / det_A;
 
     if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)     /* What if another object is in front of this triangle */ 
-        if (t < *min_distance)
-            return (*min_distance = t);
-        
+        if (t < *min_distance){
+            *min_distance = t;
+            *normal = triangle.indices.normal;
+
+            return true;
+        }
+
     return false;
 }
 
@@ -237,7 +241,7 @@ void* trace_routine(void* row_borders){
 
             for (auto triangle: scene.triangles){
                 
-                if (triangle_intersects(direction, triangle, min_distance)){
+                if (triangle_intersects(direction, triangle, min_distance, normal)){
                     // TODO: L = L_a + \sum_0^l (L_d + L_s)
                     // TODO: clamp and discretize pixel values
 
@@ -254,7 +258,7 @@ void* trace_routine(void* row_borders){
                     
                     Triangle triangle = {mesh.material_id, face};
 
-                    if (triangle_intersects(direction, triangle, min_distance)){
+                    if (triangle_intersects(direction, triangle, min_distance, normal)){
                         // TODO: L = L_a + \sum_0^l (L_d + L_s)
                         // TODO: clamp and discretize pixel values
 
