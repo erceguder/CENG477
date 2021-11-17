@@ -59,20 +59,21 @@ namespace parser
         int v0_id;
         int v1_id;
         int v2_id;
+        Vec3f normal;
     };
 
     struct Mesh
     {
         int material_id;
         std::vector<Face> faces;
-        std::vector<Vec3f> normals;
+        // std::vector<Vec3f> normals;
     };
 
     struct Triangle
     {
         int material_id;
         Face indices;
-        Vec3f normal;
+        // Vec3f normal;
     };
 
     struct Sphere
