@@ -12,6 +12,10 @@ void Ray::setOrigin(Vec3f origin) {this->origin = origin; }
 
 void Ray::setDirection(Vec3f direction) { this->direction = direction; }
 
+Vec3f Ray::getPoint(float distance){
+    return origin + direction * distance;
+}
+
 ostream& operator<<(ostream& os, const Ray& ray){
     os << "origin: " << ray.origin << ", direction: " << ray.direction;
     return os;

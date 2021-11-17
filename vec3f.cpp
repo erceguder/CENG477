@@ -39,6 +39,9 @@ Vec3f Vec3f::operator*(float c){
 Vec3f Vec3f::normalize(){
     Vec3f res;
     float length = sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+    
+    // LENGTH == 0 ???
+    
     res.x = this->x / length;
     res.y = this->y / length;
     res.z = this->z / length;
@@ -49,7 +52,7 @@ float Vec3f::dot(Vec3f obj){
     return this->x * obj.x + this->y * obj.y + this->z * obj.z;
 }
 
-Vec3f Vec3f::elementviseMultiplication(Vec3f obj){
+Vec3f Vec3f::elementwiseMultiplication(Vec3f obj){
     Vec3f res;
     res.x = this->x * obj.x;
     res.y = this->y * obj.y;
@@ -59,7 +62,6 @@ Vec3f Vec3f::elementviseMultiplication(Vec3f obj){
 
 float Vec3f::length(){
     return sqrt(this->x*this->x + this->y*this->y + this->z*this->z);
-
 }
 
 ostream& operator<<(ostream& os, const Vec3f& vec){

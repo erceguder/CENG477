@@ -23,9 +23,8 @@ class Vec3f
         //Vec3f scalarMultiplication(float c);
         float dot(Vec3f obj);
         Vec3f normalize();                   // get unit vector
-        Vec3f elementviseMultiplication(Vec3f obj);     //element-wise matrix multiplication
+        Vec3f elementwiseMultiplication(Vec3f obj);     //element-wise matrix multiplication
         float length();                         // get vector's length
-
 };
 
 

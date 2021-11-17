@@ -67,24 +67,36 @@ void computeNormals(){
 
 }
 
-Vec3f diffuse_shading(Vec3f diffuse_component, Vec3f w_i, Vec3f normal, Vec3f light_intensity, float distance){
+Vec3f diffuse_shading(Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity, float distance){
     Vec3f wi = w_i.normalize();
     Vec3f n = normal.normalize();                   // two lines can be omitted if parameters are given normalized
 
     float cos_theta = MAX(0, wi.dot(n));
+
+    /*cout << "k_d: " << diffuse_coeff << endl;
+    cout << "wi: " << wi << endl;
+    cout << "n: " << n << endl;
+    cout << "I: " << light_intensity << endl;
+    cout << "r: " << distance << endl;
+    cout << "cos_theta: " << cos_theta << endl;*/
+
     Vec3f i_over_r_squared = light_intensity * (1/(distance * distance));           // I/(r^2)
-    Vec3f res = (diffuse_component * cos_theta).elementviseMultiplication(i_over_r_squared);
+
+    //cout << "i/(r^2): " << i_over_r_squared << endl;
+    
+    Vec3f res = (diffuse_coeff * cos_theta).elementwiseMultiplication(i_over_r_squared);
+    //cout << "res: " << res << endl << endl;
 
     return res;
 }
 
-Vec3f ambient_shading(Vec3f ambient_component, Vec3f light_intensity){
-    Vec3f res = ambient_component.elementviseMultiplication(light_intensity);
+Vec3f ambient_shading(Vec3f ambient_coeff, Vec3f radiance){
+    Vec3f res = ambient_coeff.elementwiseMultiplication(radiance);
     
     return res;
 }
 
-Vec3f specular_shading(Vec3f specular_component, int phong_exponent, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
+Vec3f specular_shading(Vec3f specular_coeff, int phong_exponent, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
     Vec3f res;
     
     Vec3f wi = w_i.normalize();
@@ -102,7 +114,7 @@ Vec3f specular_shading(Vec3f specular_component, int phong_exponent, Vec3f norma
     float cos_alpha = pow(MAX(0, n.dot(half)), phong_exponent);
     Vec3f i_over_rsqured = light_intensity * (1/(distance * distance));
     
-    res = (specular_component * cos_alpha).elementviseMultiplication(i_over_rsqured);
+    res = (specular_coeff * cos_alpha).elementwiseMultiplication(i_over_rsqured);
 
     return res;
 
@@ -116,8 +128,42 @@ float determinant(float matrix[3][3]){
     return result;
 }
 
-bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance, Vec3f* normal){
+bool triangle_intersects(Ray ray, Triangle triangle, float* min_t, Vec3f* normal_p){
+    Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
+    Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
+    Vec3f c = scene.vertex_data[triangle.indices.v2_id - 1];
 
+    Vec3f normal = triangle.indices.normal;
+
+    if (ray.getDirection().dot(normal) == 0) return false;  /* floating point precision loss ? */
+
+    float t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));
+
+    Vec3f p = ray.getPoint(t);
+
+    Vec3f v_p = (p - b) * (a - b);
+    Vec3f v_c = (c - b) * (a - b);
+    if (v_p.dot(v_c) <= 0) return false;
+
+    v_p = (p - a) * (c - a);
+    v_c = (b - a) * (c - a);
+    if (v_p.dot(v_c) <= 0) return false;
+
+    v_p = (p - c) * (b - c);
+    v_c = (a - c) * (b - c);
+    if (v_p.dot(v_c) <= 0) return false;
+
+    if (t < *min_t){
+        *min_t = t;
+        *normal_p = normal;
+        return true;
+    }
+    return false;
+}
+
+/*bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance, Vec3f* normal){
+    //Returns true if the triangle is the closest object to the camera.
+    
     Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
     Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
     Vec3f c = scene.vertex_data[triangle.indices.v2_id - 1];
@@ -152,7 +198,7 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance
     float gamma = determinant(A_2) / det_A;
     float t = determinant(A_3) / det_A;
 
-    if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)     /* What if another object is in front of this triangle */ 
+    if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)
         if (t < *min_distance){
             *min_distance = t;
             *normal = triangle.indices.normal;
@@ -161,10 +207,12 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance
         }
 
     return false;
-}
+}*/
 
-bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_distance){
-
+bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_t){
+    /*
+        Returns true if the sphere is the closest object to the camera.
+    */
     Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
 
     Vec3f o_minus_c = camera.position - center;                     // o - c
@@ -178,11 +226,19 @@ bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_distance){
         float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
         float t = MIN(t_1, t_2);                // does it apply all the time??
 
-        if (t < *min_distance)
-            return (*min_distance = t);
+        if (t < *min_t)
+            return (*min_t = t);
         
     }
     return false;
+}
+
+float clamp(float val){
+    if (val < 0)
+        return 0;
+    if (val>255)
+        return 255;
+    return val;
 }
 
 void* trace_routine(void* row_borders){
@@ -211,10 +267,10 @@ void* trace_routine(void* row_borders){
     for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
         for (int i=0; i < image_width; i++){                            // columns
             
-            float max_float = numeric_limits<float>::max();
-            float* min_distance = &max_float;
-            Vec3f n;
-            Vec3f *normal = &n;                                         // normal at intersection point
+            float min_t = numeric_limits<float>::max();
+            Vec3f normal;                                               // normal at intersection point
+
+            int material_id = 0;
 
             bool intersects = false;
             
@@ -229,29 +285,22 @@ void* trace_routine(void* row_borders){
 
             for (auto sphere: scene.spheres){
 
-                if(sphere_intersects(direction, sphere, min_distance)){
-                    // TODO: L = L_a + \sum_0^l (L_d + L_s)
-                    // TODO: clamp and discretize pixel values
+                if(sphere_intersects(direction, sphere, &min_t)){ 
+                    // this sphere is the closest object
 
-                    image[start_index++] = 255;
-                    image[start_index++] = 255;
-                    image[start_index++] = 255;
+                    material_id = sphere.material_id;
 
                     intersects = true;
                 }
-
             }
 
             for (auto triangle: scene.triangles){
                 
-                if (triangle_intersects(direction, triangle, min_distance, normal)){
-                    // TODO: L = L_a + \sum_0^l (L_d + L_s)
-                    // TODO: clamp and discretize pixel values
+                //if (triangle_intersects(direction, triangle, &min_distance, &normal)){
+                if (triangle_intersects(primaryRay, triangle, &min_t, &normal)){
+                    // this triangle is the closest object
 
-                    image[start_index++] = 255;
-                    image[start_index++] = 255;
-                    image[start_index++] = 255;
-             
+                    material_id = triangle.material_id;
                     intersects = true;
                 }
             }
@@ -261,16 +310,11 @@ void* trace_routine(void* row_borders){
                     
                     Triangle triangle = {mesh.material_id, face};
 
-                    if (triangle_intersects(direction, triangle, min_distance, normal)){
-                        // TODO: L = L_a + \sum_0^l (L_d + L_s)
-                        // TODO: clamp and discretize pixel values
-
-                        image[start_index++] = 255;
-                        image[start_index++] = 255;
-                        image[start_index++] = 255;
-                        
+                    //if (triangle_intersects(direction, triangle, &min_distance, &normal)){
+                    if (triangle_intersects(primaryRay, triangle, &min_t, &normal)){
+                        // this triangle is the closest object
+                        material_id = mesh.material_id;
                         intersects = true;
-                        break;
                     }
                 }
             }
@@ -279,6 +323,28 @@ void* trace_routine(void* row_borders){
                 image[start_index++] = scene.background_color.x;
                 image[start_index++] = scene.background_color.y;
                 image[start_index++] = scene.background_color.z;
+            }
+            else{
+                Vec3f ambient = ambient_shading(scene.materials[material_id-1].ambient, scene.ambient_light);
+                Vec3f diffuse;
+                Vec3f specular;
+
+                for (auto point_light: scene.point_lights){
+                    Vec3f intersection_pt = primaryRay.getPoint(min_t);
+                    Vec3f w_i = point_light.position - intersection_pt;
+
+                    float distance = (point_light.position - intersection_pt).length();
+
+                    diffuse = diffuse + diffuse_shading(scene.materials[material_id-1].diffuse, w_i, 
+                            normal, point_light.intensity, distance);
+                }
+
+                //cout << diffuse << endl;
+
+                /* Clamp values under 0 and over 255 */                
+                image[start_index++] = int(clamp(diffuse.x + ambient.x));
+                image[start_index++] = int(clamp(diffuse.y+ ambient.y));
+                image[start_index++] = int(clamp(diffuse.z + ambient.z));
             }
             
         }
@@ -304,6 +370,10 @@ int main(int argc, char* argv[])
             {2*(camera.image_height/4), 3*(camera.image_height/4) - 1},
             {3*(camera.image_height/4), 4*(camera.image_height/4) - 1}
         };
+
+        /*int single_thread_borders[2] = {0, camera.image_height-1};
+        pthread_create(threads, NULL, trace_routine, single_thread_borders);*/
+
 
         pthread_create(&threads[0], NULL, trace_routine, row_borders[0]);
         pthread_create(&threads[1], NULL, trace_routine, row_borders[1]);
