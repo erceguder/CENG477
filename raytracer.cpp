@@ -7,6 +7,7 @@
 #include <cmath>
 #include <pthread.h>
 #include <limits>
+#include <chrono>
 
 #define THREAD_NUM 4
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -78,9 +79,7 @@ Vec3f diffuse_shading(Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_
 }
 
 Vec3f ambient_shading(Vec3f ambient_coeff, Vec3f radiance){
-    Vec3f res = ambient_coeff.elementwiseMultiplication(radiance);
-    
-    return res;
+    return ambient_coeff.elementwiseMultiplication(radiance);
 }
 
 Vec3f specular_shading(Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
@@ -113,9 +112,9 @@ bool triangle_intersects(Ray ray, Triangle triangle, float* min_t, Vec3f* normal
 
     Vec3f normal = triangle.indices.normal;
 
-    if (ray.getDirection().dot(normal) == 0) return false;  /* floating point precision loss ? */
+    if (ray.getDirection().dot(normal) == 0) return false;  // floating point precision loss ?
 
-    float t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));
+    float t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));   // d . n = 0
 
     Vec3f p = ray.getPoint(t);
 
@@ -147,12 +146,14 @@ bool triangle_intersects(Ray ray, Triangle triangle, float* min_t, Vec3f* normal
     return result;
 }
 
-bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance, Vec3f* normal){
+bool triangle_intersects(Ray ray, Triangle triangle, float* min_distance, Vec3f* normal_p){
     //Returns true if the triangle is the closest object to the camera.
     
     Vec3f a = scene.vertex_data[triangle.indices.v0_id - 1];
     Vec3f b = scene.vertex_data[triangle.indices.v1_id - 1];
     Vec3f c = scene.vertex_data[triangle.indices.v2_id - 1];
+
+    Vec3f direction = ray.getDirection();
 
     float A[3][3] = {
         {(a-b).x, (a-c).x, direction.x},
@@ -187,7 +188,7 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance
     if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)
         if (t < *min_distance){
             *min_distance = t;
-            *normal = triangle.indices.normal;
+            *normal_p = triangle.indices.normal;
 
             return true;
         }
@@ -342,6 +343,9 @@ void* trace_routine(void* row_borders){
 }
 
 int main(int argc, char* argv[]){   
+
+    auto t_start = chrono::high_resolution_clock::now();
+
     scene.loadFromXml(argv[1]);
     computeNormals();
 
@@ -383,4 +387,6 @@ int main(int argc, char* argv[]){
         delete [] image;
 
     }
+    auto t_end = chrono::high_resolution_clock::now();
+    cout << chrono::duration<double, milli>(t_end - t_start).count() / 1000 << endl;
 }
