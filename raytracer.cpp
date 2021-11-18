@@ -83,14 +83,14 @@ Vec3f ambient_shading(Vec3f ambient_coeff, Vec3f radiance){
     return res;
 }
 
-Vec3f specular_shading(Vec3f specular_coeff, int phong_exponent, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
+Vec3f specular_shading(Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity, float distance){
     Vec3f res;
     
     Vec3f wi = w_i.normalize();
     Vec3f wo = w_o.normalize();
-    Vec3f n = normal.normalize();
+    //Vec3f n = normal.normalize();
 
-    float cos_theta = wi.dot(n) * (1/(wi.length() * n.length()));       // if the light is coming from behind the surface
+    float cos_theta = wi.dot(normal);// * (1/(wi.length() * normal.length()));       // if the light is coming from behind the surface
     float theta = acos(cos_theta) * 180.0 / PI;
     if (theta >= 90)
         return res;
@@ -98,10 +98,10 @@ Vec3f specular_shading(Vec3f specular_coeff, int phong_exponent, Vec3f normal, V
     Vec3f wi_plus_wo = wi + wo;
     Vec3f half = wi_plus_wo * (1/wi_plus_wo.length());
 
-    float cos_alpha = pow(MAX(0, n.dot(half)), phong_exponent);
+    float cos_alpha = pow(MAX(0, normal.dot(half)), material.phong_exponent);
     Vec3f i_over_rsqured = light_intensity * (1/(distance * distance));
     
-    res = (specular_coeff * cos_alpha).elementwiseMultiplication(i_over_rsqured);
+    res = (material.specular * cos_alpha).elementwiseMultiplication(i_over_rsqured);
 
     return res;
 }
@@ -319,17 +319,21 @@ void* trace_routine(void* row_borders){
                 for (auto point_light: scene.point_lights){
                     Vec3f intersection_pt = primaryRay.getPoint(min_t);
                     Vec3f w_i = point_light.position - intersection_pt;
+                    Vec3f w_o = camera.position - intersection_pt;
 
                     float distance = (point_light.position - intersection_pt).length();
 
                     diffuse = diffuse + diffuse_shading(scene.materials[material_id-1].diffuse, w_i, 
                             normal, point_light.intensity, distance);
+
+                    specular = specular + specular_shading(scene.materials[material_id-1], normal, w_i, 
+                            w_o, point_light.intensity, distance);
                 }
 
                 /* Clamp values under 0 and over 255 */                
-                image[start_index++] = int(clamp(diffuse.x + ambient.x));
-                image[start_index++] = int(clamp(diffuse.y+ ambient.y));
-                image[start_index++] = int(clamp(diffuse.z + ambient.z));
+                image[start_index++] = int(clamp(diffuse.x + ambient.x + specular.x));
+                image[start_index++] = int(clamp(diffuse.y+ ambient.y + specular.y));
+                image[start_index++] = int(clamp(diffuse.z + ambient.z + specular.z));
             }
             //cout << "i:" << i << ", j: " << j << endl;
         }
@@ -337,8 +341,7 @@ void* trace_routine(void* row_borders){
     return NULL;
 }
 
-int main(int argc, char* argv[])
-{   
+int main(int argc, char* argv[]){   
     scene.loadFromXml(argv[1]);
     computeNormals();
 
