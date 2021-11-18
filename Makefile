@@ -1,5 +1,5 @@
 all:
-	g++ *.cpp -o raytracer -std=c++11 -O3
+	g++ *.cpp -o raytracer -pthread -std=c++11 -O3
 
 simple:
 	./raytracer sample_scenes/inputs/simple.xml

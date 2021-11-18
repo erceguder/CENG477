@@ -139,8 +139,7 @@ bool triangle_intersects(Ray ray, Triangle triangle, float* min_t, Vec3f* normal
     return false;
 }
 
-/*
-float determinant(float matrix[3][3]){
+/*float determinant(float matrix[3][3]){
     float result = matrix[0][0] * (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2]);
     result += matrix[0][1] * (matrix[2][0]*matrix[1][2] - matrix[1][0]*matrix[2][2]);
     result += matrix[0][2] * (matrix[1][0]*matrix[2][1] - matrix[2][0]*matrix[1][1]);
@@ -196,15 +195,15 @@ bool triangle_intersects(Vec3f direction, Triangle triangle, float* min_distance
     return false;
 }*/
 
-bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_t){
+bool sphere_intersects(Ray ray, Sphere sphere, float* min_t, Vec3f* normal_p){
     /*
         Returns true if the sphere is the closest object to the camera.
     */
     Vec3f center = scene.vertex_data[sphere.center_vertex_id - 1];
 
     Vec3f o_minus_c = camera.position - center;                     // o - c
-    float d_dot_o_minus_c = direction.dot(o_minus_c);               // d . (o - c)
-    float d_dot_d = direction.dot(direction);                       // d . d
+    float d_dot_o_minus_c = ray.getDirection().dot(o_minus_c);               // d . (o - c)
+    float d_dot_d = ray.getDirection().dot(ray.getDirection());                       // d . d
 
     float sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(sphere.radius, 2)) );
 
@@ -213,9 +212,13 @@ bool sphere_intersects(Vec3f direction, Sphere sphere, float* min_t){
         float t_2 = (-d_dot_o_minus_c + sqrt_discr) / d_dot_d;
         float t = MIN(t_1, t_2);                // does it apply all the time??
 
-        if (t < *min_t)
-            return (*min_t = t);
-        
+        if (t < *min_t){
+            *min_t = t;
+            Vec3f sphere_center = scene.vertex_data[sphere.center_vertex_id - 1];
+            *normal_p = (ray.getPoint(t) - sphere_center).normalize();
+            
+            return true;
+        }
     }
     return false;
 }
@@ -272,7 +275,7 @@ void* trace_routine(void* row_borders){
 
             for (auto sphere: scene.spheres){
 
-                if(sphere_intersects(direction, sphere, &min_t)){ 
+                if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){ 
                     // this sphere is the closest object so far
 
                     material_id = sphere.material_id;
@@ -328,8 +331,10 @@ void* trace_routine(void* row_borders){
                 image[start_index++] = int(clamp(diffuse.y+ ambient.y));
                 image[start_index++] = int(clamp(diffuse.z + ambient.z));
             }
+            //cout << "i:" << i << ", j: " << j << endl;
         }
     }
+    return NULL;
 }
 
 int main(int argc, char* argv[])
@@ -343,6 +348,11 @@ int main(int argc, char* argv[])
 
         camera = scene.cameras[i];
         image = new unsigned char [camera.image_width * camera.image_height * 3];
+
+        if (image == NULL){
+            cout << "image cannot be allocated\n";
+            exit(1);
+        }
 
         /* This assumes image height is a factor of 4 */
         int row_borders[4][2] = {
