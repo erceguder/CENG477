@@ -13,7 +13,7 @@ namespace parser
     //so that you are not enforced to adopt any style or design.
     /*struct Vec3f
     {
-        float x, y, z;
+        double x, y, z;
     };
 
     struct Vec3i
@@ -23,7 +23,7 @@ namespace parser
     */
     struct Vec4f
     {
-        float x, y, z, w;   // Left, right, bottom, top
+        double x, y, z, w;   // Left, right, bottom, top
     };
     
 
@@ -33,7 +33,7 @@ namespace parser
         Vec3f gaze;
         Vec3f up;
         Vec4f near_plane;
-        float near_distance;
+        double near_distance;
         int image_width, image_height;
         std::string image_name;
     };
@@ -51,7 +51,7 @@ namespace parser
         Vec3f diffuse;
         Vec3f specular;
         Vec3f mirror;
-        float phong_exponent;
+        double phong_exponent;
     };
 
     struct Face
@@ -80,14 +80,14 @@ namespace parser
     {
         int material_id;
         int center_vertex_id;
-        float radius;
+        double radius;
     };
 
     struct Scene
     {
         //Data
         Vec3i background_color;
-        float shadow_ray_epsilon;
+        double shadow_ray_epsilon;
         int max_recursion_depth;
         std::vector<Camera> cameras;
         Vec3f ambient_light;

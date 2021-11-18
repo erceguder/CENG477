@@ -28,7 +28,7 @@ Vec3f Vec3f::operator*(Vec3f obj){
     return res;
 }
 
-Vec3f Vec3f::operator*(float c){
+Vec3f Vec3f::operator*(double c){
     Vec3f res;
     res.x = this->x * c;
     res.y = this->y * c;
@@ -38,7 +38,7 @@ Vec3f Vec3f::operator*(float c){
 
 Vec3f Vec3f::normalize(){
     Vec3f res;
-    float length = sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+    double length = sqrt(this->dot(*this)); //sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
     
     // LENGTH == 0 ???
     
@@ -48,7 +48,7 @@ Vec3f Vec3f::normalize(){
     return res;
 }
 
-float Vec3f::dot(Vec3f obj){
+double Vec3f::dot(Vec3f obj){
     return this->x * obj.x + this->y * obj.y + this->z * obj.z;
 }
 
@@ -60,7 +60,7 @@ Vec3f Vec3f::elementwiseMultiplication(Vec3f obj){
     return res;
 }
 
-float Vec3f::length(){
+double Vec3f::length(){
     return sqrt(this->x*this->x + this->y*this->y + this->z*this->z);
 }
 

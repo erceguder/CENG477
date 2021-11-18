@@ -2,7 +2,7 @@
 
 Ray::Ray(): origin(0, 0, 0), direction(0, 0, 0) {}
 
-Ray::Ray(Vec3f origin, Vec3f direction): origin(origin), direction(direction){}
+Ray::Ray(Vec3f org, Vec3f dir): origin(org), direction(dir){}
 
 Vec3f Ray::getOrigin() const { return this->origin; }
 
@@ -12,7 +12,7 @@ void Ray::setOrigin(Vec3f origin) {this->origin = origin; }
 
 void Ray::setDirection(Vec3f direction) { this->direction = direction; }
 
-Vec3f Ray::getPoint(float distance){
+Vec3f Ray::getPoint(double distance){
     return origin + direction * distance;
 }
 

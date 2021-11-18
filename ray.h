@@ -17,7 +17,7 @@ class Ray
         void setOrigin(Vec3f origin);
         void setDirection(Vec3f direction);
 
-        Vec3f getPoint(float distance);
+        Vec3f getPoint(double distance);
 
         friend ostream& operator<<(ostream& os, const Ray& ray);     
 };
