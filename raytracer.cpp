@@ -114,21 +114,21 @@ bool triangle_intersects(Ray ray, Triangle triangle, float* min_t, Vec3f* normal
 
     if (ray.getDirection().dot(normal) == 0) return false;  // floating point precision loss ?
 
-    float t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));   // d . n = 0
+    float t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));
 
     Vec3f p = ray.getPoint(t);
 
     Vec3f v_p = (p - b) * (a - b);
     Vec3f v_c = (c - b) * (a - b);
-    if (v_p.dot(v_c) <= 0) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     v_p = (p - a) * (c - a);
     v_c = (b - a) * (c - a);
-    if (v_p.dot(v_c) <= 0) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     v_p = (p - c) * (b - c);
     v_c = (a - c) * (b - c);
-    if (v_p.dot(v_c) <= 0) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     if (t < *min_t){
         *min_t = t;
