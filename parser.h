@@ -3,32 +3,15 @@
 
 #include <string>
 #include <vector>
-
 #include "vec3f.h"
-#include "vec3i.h"
 
 namespace parser
 {
-    //Notice that all the structures are as simple as possible
-    //so that you are not enforced to adopt any style or design.
-    /*struct Vec3f
-    {
-        double x, y, z;
-    };
-
-    struct Vec3i
-    {
-        int x, y, z;
-    };
-    */
-    struct Vec4f
-    {
+    struct Vec4f{
         double x, y, z, w;   // Left, right, bottom, top
     };
     
-
-    struct Camera
-    {
+    struct Camera{
         Vec3f position;
         Vec3f gaze;
         Vec3f up;
@@ -86,7 +69,7 @@ namespace parser
     struct Scene
     {
         //Data
-        Vec3i background_color;
+        Vec3f background_color;
         double shadow_ray_epsilon;
         int max_recursion_depth;
         std::vector<Camera> cameras;

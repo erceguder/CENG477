@@ -1,14 +1,13 @@
 #include <iostream>
-#include "parser.h"
-#include "ppm.h"
-#include "ray.h"
-#include "vec3f.h"
-#include "vec3i.h"
 #include <cmath>
 #include <pthread.h>
 #include <limits>
 #include <chrono>
 
+#include "parser.h"
+#include "ppm.h"
+#include "ray.h"
+#include "vec3f.h"
 
 #define THREAD_NUM 4
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -103,22 +102,22 @@ Vec3f specular_shading(Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Ve
 
     double cos_alpha = pow(MAX(0, normal.dot(half)), material.phong_exponent);
     Vec3f i_over_rsqured = light_intensity * (1/(distance * distance));
-    
+
     res = (material.specular * cos_alpha).elementwiseMultiplication(i_over_rsqured);
 
     return res;
 }
 
-bool triangle_intersects(bool shadow, Ray ray, Face face, double* min_t, Vec3f* normal_p){
+bool triangle_intersects(bool bfc, Ray ray, Face face, double* min_t, Vec3f* normal_p){
     Vec3f a = scene.vertex_data[face.v0_id - 1];
     Vec3f b = scene.vertex_data[face.v1_id - 1];
     Vec3f c = scene.vertex_data[face.v2_id - 1];
 
     Vec3f normal = face.normal;
 
-    if (!shadow && (normal.dot(ray.getDirection()) > 0)) return false;   // Back-face culling
+    if (bfc && (normal.dot(ray.getDirection()) > 0)) return false;   // Back-face culling
 
-    if (ray.getDirection().dot(normal) == 0) return false;  // doubleing point precision loss ?
+    if (ray.getDirection().dot(normal) == 0) return false;  // floating point precision loss ?
 
     double t = ((a - ray.getOrigin()).dot(normal)) / (ray.getDirection().dot(normal));
 
@@ -247,12 +246,12 @@ bool in_shadow(Ray shadow_ray, PointLight light){
             return true;
     
     for (auto triangle: scene.triangles)
-        if (triangle_intersects(true, shadow_ray, triangle.indices, &t_to_light, &dummy_normal))
+        if (triangle_intersects(false, shadow_ray, triangle.indices, &t_to_light, &dummy_normal))
             return true;
     
     for (auto mesh: scene.meshes)
         for (auto face: mesh.faces){
-            if (triangle_intersects(true, shadow_ray, face, &t_to_light, &dummy_normal))
+            if (triangle_intersects(false, shadow_ray, face, &t_to_light, &dummy_normal))
                 return true;
         }
     return false;
@@ -298,14 +297,14 @@ void* trace_routine(void* row_borders){
             Ray primaryRay(camera.position, s - camera.position);       // d = s - e
 
             for (auto sphere: scene.spheres)
-                if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){ 
+                if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){
                     // this sphere is the closest object so far
                     material_id = sphere.material_id;
                     intersects = true;
                 }
 
             for (auto triangle: scene.triangles)
-                if (triangle_intersects(false, primaryRay, triangle.indices, &min_t, &normal)){
+                if (triangle_intersects(true, primaryRay, triangle.indices, &min_t, &normal)){
                     // this triangle is the closest object so far
                     material_id = triangle.material_id;
                     intersects = true;
@@ -313,7 +312,7 @@ void* trace_routine(void* row_borders){
 
             for (auto mesh: scene.meshes)
                 for (auto face: mesh.faces){
-                    if (triangle_intersects(false, primaryRay, face, &min_t, &normal)){
+                    if (triangle_intersects(true, primaryRay, face, &min_t, &normal)){
                         // this triangle is the closest object so far
                         material_id = mesh.material_id;
                         intersects = true;
