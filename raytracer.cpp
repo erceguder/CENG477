@@ -23,7 +23,58 @@ Scene scene;
 unsigned char* image;
 Camera camera;
 
-void computeNormals(){
+void* compute_normal_routine(void* arg){
+
+    int thread_number = *((int*)arg);
+
+    int triangle_count = scene.triangles.size();
+    int mesh_count = scene.meshes.size();
+
+    int per_thread = triangle_count/THREAD_NUM;
+    
+    int upper_bound = (thread_number == THREAD_NUM) ? triangle_count: thread_number*per_thread;
+
+    for (int i=(thread_number-1)*per_thread; i<upper_bound; i++){
+
+        /*Face indices = scene.triangles[i].indices;
+
+        Vec3f v0 = scene.vertex_data[indices.v0_id-1];
+        Vec3f v1 = scene.vertex_data[indices.v1_id-1];
+        Vec3f v2 = scene.vertex_data[indices.v2_id-1];                  // vertices of the triangle
+
+        Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
+        scene.triangles[i].indices.normal = normal;*/
+
+        scene.triangles[i].indices.computeNormal();
+    }
+
+    for (int i=0; i<mesh_count; i++){
+
+        Mesh mesh = scene.meshes[i];
+
+        int faces_count = scene.meshes[i].faces.size();
+
+        per_thread = faces_count/THREAD_NUM;
+        upper_bound = (thread_number == THREAD_NUM) ? faces_count: thread_number*per_thread;
+
+        for (int j=(thread_number-1)*per_thread; j<upper_bound; j++){
+            
+            /*Face indices = mesh.faces[j];
+
+            Vec3f v0 = scene.vertex_data[indices.v0_id-1];
+            Vec3f v1 = scene.vertex_data[indices.v1_id-1];
+            Vec3f v2 = scene.vertex_data[indices.v2_id-1];
+
+            Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
+            scene.meshes[i].faces[j].normal = normal;*/
+
+            scene.meshes[i].faces[j].computeNormal();
+        }
+    }
+    return NULL;
+}
+
+void compute_normals(){
 
     int triangle_count = scene.triangles.size();
     
@@ -61,6 +112,7 @@ void computeNormals(){
     }
 
 }
+
 
 Vec3f diffuse_shading(Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity){//, double distance){
     double distance = w_i.length();
@@ -367,8 +419,15 @@ int main(int argc, char* argv[]){
     scene.loadFromXml(argv[1]);
     pthread_t threads[THREAD_NUM];
 
-    //pthread_create(&threads[0], NULL, computeNormals, NULL);
-    computeNormals();
+    int thread_numbers[THREAD_NUM] = {1, 2, 3, 4};
+
+    // for (int i=0; i < THREAD_NUM; i++)
+    //     pthread_create(&threads[i], NULL, compute_normal_routine, &thread_numbers[i]);
+
+    // for (int i=0; i < THREAD_NUM; i++)
+    //     pthread_join(threads[i], NULL);
+
+    compute_normals();
 
     for (int i=0; i < scene.cameras.size(); i++){
 

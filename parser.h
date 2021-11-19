@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "vec3f.h"
+#include "face.h"
 
 namespace parser
 {
@@ -37,13 +38,13 @@ namespace parser
         double phong_exponent;
     };
 
-    struct Face
-    {
-        int v0_id;
-        int v1_id;
-        int v2_id;
-        Vec3f normal;
-    };
+    // struct Face
+    // {
+    //     int v0_id;
+    //     int v1_id;
+    //     int v2_id;
+    //     Vec3f normal;
+    // };
 
     struct Mesh
     {
