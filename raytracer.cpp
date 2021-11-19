@@ -231,7 +231,7 @@ int clamp(double val){
 
 bool in_shadow(Ray shadow_ray, PointLight light){
     
-    double t_to_light = (light.position - shadow_ray.getOrigin()).length() / shadow_ray.getDirection().length();
+    double t_to_light = (light.position - shadow_ray.getOrigin()).length() / 1;//shadow_ray.getDirection().length();
     Vec3f dummy_normal;
 
     for (auto sphere: scene.spheres)
@@ -250,10 +250,10 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     return false;
 }
 
-Vec3f calculate_colour(Ray& ray, int* recursion_depth){
+Vec3f calculate_colour(Ray& ray, int recursion_depth){
 
     Vec3f vec;
-    if (*recursion_depth-- < 0 ) return vec;
+    if (recursion_depth-- < 0 ) return vec;
     
     bool intersects = false;
     double min_t = numeric_limits<double>::max();
@@ -306,15 +306,15 @@ Vec3f calculate_colour(Ray& ray, int* recursion_depth){
                     w_o, point_light.intensity);
         }
 
-        normal = normal.normalize();
+        //normal = normal.normalize();
         w_o = w_o.normalize();
 
         Vec3f w_r = (normal * normal.dot(w_o) * 2 - w_o).normalize();
-        Ray reflecting_ray(intersection_pt, w_r);
+        Ray reflecting_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_r);
 
-        mirror = material.mirror.elementwiseMultiplication(calculate_colour(reflecting_ray, recursion_depth));
+        // if (material.is_mirror)
+        //     mirror = material.mirror.elementwiseMultiplication(calculate_colour(reflecting_ray, recursion_depth));
 
-        /* Clamp values under 0 and over 255 */
         return diffuse + ambient + specular + mirror;
     }
 }
@@ -350,69 +350,11 @@ void* trace_routine(void* row_borders){
             Vec3f s = q + (u * s_u) - (camera.up * s_v);                // s = q + u * s_u - v * s_v
             Ray primaryRay(camera.position, s - camera.position);       // d = s - e
 
-            // bool intersects = false;
-            // double min_t = numeric_limits<double>::max();
-            // Vec3f normal;                                               // normal at intersection point
-            // Material material;
-
-            int recursion_depth = scene.max_recursion_depth;
-            Vec3f colour = calculate_colour(primaryRay, &recursion_depth);
+            Vec3f colour = calculate_colour(primaryRay, scene.max_recursion_depth);
 
             image[index++] = clamp(colour.x);
             image[index++] = clamp(colour.y);
             image[index++] = clamp(colour.z);
-
-            // for (auto sphere: scene.spheres)
-            //     if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){
-            //         material = scene.materials[sphere.material_id-1];
-            //         intersects = true;
-            //     }
-
-            // for (auto triangle: scene.triangles)
-            //     if (triangle_intersects(true, primaryRay, triangle.indices, &min_t, &normal)){
-            //         material = scene.materials[triangle.material_id-1];
-            //         intersects = true;
-            //     }
-
-            // for (auto mesh: scene.meshes)
-            //     for (auto face: mesh.faces){
-            //         if (triangle_intersects(true, primaryRay, face, &min_t, &normal)){
-            //             material = scene.materials[mesh.material_id-1];
-            //             intersects = true;
-            //         }
-            //     }
-
-            // if (!intersects){
-            //     image[index++] = scene.background_color.x;
-            //     image[index++] = scene.background_color.y;
-            //     image[index++] = scene.background_color.z;
-            // }
-            // else{
-            //     Vec3f intersection_pt = primaryRay.getPoint(min_t);
-
-            //     Vec3f ambient = ambient_shading(material.ambient, scene.ambient_light);
-            //     Vec3f diffuse;
-            //     Vec3f specular;
-
-            //     for (auto point_light: scene.point_lights){
-            //         Vec3f w_i = point_light.position - intersection_pt;
-            //         Vec3f w_o = camera.position - intersection_pt;
-
-            //         Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
-            //         if (in_shadow(shadow_ray, point_light)) continue;
-
-            //         diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
-            //                 normal, point_light.intensity);
-
-            //         specular = specular + specular_shading(material, normal, w_i, 
-            //                 w_o, point_light.intensity);
-            //     }
-
-            //     /* Clamp values under 0 and over 255 */                
-            //     image[index++] = clamp(diffuse.x + ambient.x + specular.x);//clamp(ambient.x);
-            //     image[index++] = clamp(diffuse.y+ ambient.y + specular.y);//clamp(ambient.y);
-            //     image[index++] = clamp(diffuse.z + ambient.z + specular.z);//clamp(ambient.z);
-            // }
         }
     }
     return NULL;
