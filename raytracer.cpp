@@ -250,6 +250,62 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     return false;
 }
 
+Vec3f calculate_colour(Ray& ray){
+
+    bool intersects = false;
+    double min_t = numeric_limits<double>::max();
+    Vec3f normal;                                               // normal at intersection point
+    Material material;
+
+    for (auto sphere: scene.spheres)
+        if(sphere_intersects(ray, sphere, &min_t, &normal)){
+            material = scene.materials[sphere.material_id-1];
+            intersects = true;
+        }
+
+    for (auto triangle: scene.triangles)
+        if (triangle_intersects(true, ray, triangle.indices, &min_t, &normal)){
+            material = scene.materials[triangle.material_id-1];
+            intersects = true;
+        }
+
+    for (auto mesh: scene.meshes)
+        for (auto face: mesh.faces){
+            if (triangle_intersects(true, ray, face, &min_t, &normal)){
+                material = scene.materials[mesh.material_id-1];
+                intersects = true;
+            }
+        }
+
+    if (!intersects){
+        return scene.background_color;
+    }
+    else{
+        Vec3f intersection_pt = ray.getPoint(min_t);
+
+        Vec3f ambient = ambient_shading(material.ambient, scene.ambient_light);
+        Vec3f diffuse;
+        Vec3f specular;
+
+        for (auto point_light: scene.point_lights){
+            Vec3f w_i = point_light.position - intersection_pt;
+            Vec3f w_o = camera.position - intersection_pt;
+
+            Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
+            if (in_shadow(shadow_ray, point_light)) continue;
+
+            diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
+                    normal, point_light.intensity);
+
+            specular = specular + specular_shading(material, normal, w_i, 
+                    w_o, point_light.intensity);
+        }
+
+        /* Clamp values under 0 and over 255 */                
+        return diffuse + ambient + specular;
+    }
+}
+
 void* trace_routine(void* row_borders){
     /*
         row_borders:    first and the last rows of the image for the thread to work on
@@ -259,7 +315,7 @@ void* trace_routine(void* row_borders){
 
     int image_width = camera.image_width, image_height = camera.image_height;
 
-    int start_index = start_row * image_width * 3;
+    int index = start_row * image_width * 3;
 
     double left = camera.near_plane.x;
     double right = camera.near_plane.y;
@@ -275,76 +331,73 @@ void* trace_routine(void* row_borders){
 
     for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
         for (int i=0; i < image_width; i++){                            // columns
-            
-            double min_t = numeric_limits<double>::max();
-            Vec3f normal;                                               // normal at intersection point
-            Material material;
-
-            bool intersects = false;
-            
             double s_u = (i + .5) * pixel_width;
             double s_v = (j + .5) * pixel_height;
 
             Vec3f s = q + (u * s_u) - (camera.up * s_v);                // s = q + u * s_u - v * s_v
             Ray primaryRay(camera.position, s - camera.position);       // d = s - e
 
-            for (auto sphere: scene.spheres)
-                if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){
-                    // this sphere is the closest object so far
-                    //material_id = sphere.material_id;
-                    material = scene.materials[sphere.material_id-1];
-                    intersects = true;
-                }
+            // bool intersects = false;
+            // double min_t = numeric_limits<double>::max();
+            // Vec3f normal;                                               // normal at intersection point
+            // Material material;
+            
+            Vec3f colour = calculate_colour(primaryRay);
+            image[index++] = clamp(colour.x);
+            image[index++] = clamp(colour.y);
+            image[index++] = clamp(colour.z);
 
-            for (auto triangle: scene.triangles)
-                if (triangle_intersects(true, primaryRay, triangle.indices, &min_t, &normal)){
-                    // this triangle is the closest object so far
-                    //material_id = triangle.material_id;
-                    material = scene.materials[triangle.material_id-1];
-                    intersects = true;
-                }
+            // for (auto sphere: scene.spheres)
+            //     if(sphere_intersects(primaryRay, sphere, &min_t, &normal)){
+            //         material = scene.materials[sphere.material_id-1];
+            //         intersects = true;
+            //     }
 
-            for (auto mesh: scene.meshes)
-                for (auto face: mesh.faces){
-                    if (triangle_intersects(true, primaryRay, face, &min_t, &normal)){
-                        // this triangle is the closest object so far
-                        //material_id = mesh.material_id;
-                        material = scene.materials[mesh.material_id-1];
-                        intersects = true;
-                    }
-                }
+            // for (auto triangle: scene.triangles)
+            //     if (triangle_intersects(true, primaryRay, triangle.indices, &min_t, &normal)){
+            //         material = scene.materials[triangle.material_id-1];
+            //         intersects = true;
+            //     }
 
-            if (!intersects){
-                image[start_index++] = scene.background_color.x;
-                image[start_index++] = scene.background_color.y;
-                image[start_index++] = scene.background_color.z;
-            }
-            else{
-                Vec3f intersection_pt = primaryRay.getPoint(min_t);
+            // for (auto mesh: scene.meshes)
+            //     for (auto face: mesh.faces){
+            //         if (triangle_intersects(true, primaryRay, face, &min_t, &normal)){
+            //             material = scene.materials[mesh.material_id-1];
+            //             intersects = true;
+            //         }
+            //     }
 
-                Vec3f ambient = ambient_shading(material.ambient, scene.ambient_light);
-                Vec3f diffuse;
-                Vec3f specular;
+            // if (!intersects){
+            //     image[index++] = scene.background_color.x;
+            //     image[index++] = scene.background_color.y;
+            //     image[index++] = scene.background_color.z;
+            // }
+            // else{
+            //     Vec3f intersection_pt = primaryRay.getPoint(min_t);
 
-                for (auto point_light: scene.point_lights){
-                    Vec3f w_i = point_light.position - intersection_pt;
-                    Vec3f w_o = camera.position - intersection_pt;
+            //     Vec3f ambient = ambient_shading(material.ambient, scene.ambient_light);
+            //     Vec3f diffuse;
+            //     Vec3f specular;
 
-                    Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
-                    if (in_shadow(shadow_ray, point_light)) continue;
+            //     for (auto point_light: scene.point_lights){
+            //         Vec3f w_i = point_light.position - intersection_pt;
+            //         Vec3f w_o = camera.position - intersection_pt;
 
-                    diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
-                            normal, point_light.intensity);
+            //         Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
+            //         if (in_shadow(shadow_ray, point_light)) continue;
 
-                    specular = specular + specular_shading(material, normal, w_i, 
-                            w_o, point_light.intensity);
-                }
+            //         diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
+            //                 normal, point_light.intensity);
 
-                /* Clamp values under 0 and over 255 */                
-                image[start_index++] = clamp(diffuse.x + ambient.x + specular.x);//clamp(ambient.x);
-                image[start_index++] = clamp(diffuse.y+ ambient.y + specular.y);//clamp(ambient.y);
-                image[start_index++] = clamp(diffuse.z + ambient.z + specular.z);//clamp(ambient.z);
-            }
+            //         specular = specular + specular_shading(material, normal, w_i, 
+            //                 w_o, point_light.intensity);
+            //     }
+
+            //     /* Clamp values under 0 and over 255 */                
+            //     image[index++] = clamp(diffuse.x + ambient.x + specular.x);//clamp(ambient.x);
+            //     image[index++] = clamp(diffuse.y+ ambient.y + specular.y);//clamp(ambient.y);
+            //     image[index++] = clamp(diffuse.z + ambient.z + specular.z);//clamp(ambient.z);
+            // }
         }
     }
     return NULL;
