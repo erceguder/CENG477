@@ -330,7 +330,7 @@ void* trace_routine(void* row_borders){
                     Vec3f w_i = point_light.position - intersection_pt;
                     Vec3f w_o = camera.position - intersection_pt;
 
-                    Ray shadow_ray(intersection_pt + (w_i*scene.shadow_ray_epsilon), w_i.normalize());
+                    Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
                     if (in_shadow(shadow_ray, point_light)) continue;
 
                     diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
