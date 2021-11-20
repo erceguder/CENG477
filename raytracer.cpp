@@ -35,16 +35,6 @@ void* compute_normal_routine(void* arg){
     int upper_bound = (thread_number == THREAD_NUM) ? triangle_count: thread_number*per_thread;
 
     for (int i=(thread_number-1)*per_thread; i<upper_bound; i++){
-
-        /*Face indices = scene.triangles[i].indices;
-
-        Vec3f v0 = scene.vertex_data[indices.v0_id-1];
-        Vec3f v1 = scene.vertex_data[indices.v1_id-1];
-        Vec3f v2 = scene.vertex_data[indices.v2_id-1];                  // vertices of the triangle
-
-        Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-        scene.triangles[i].indices.normal = normal;*/
-
         scene.triangles[i].indices.computeNormal();
     }
 
@@ -58,16 +48,6 @@ void* compute_normal_routine(void* arg){
         upper_bound = (thread_number == THREAD_NUM) ? faces_count: thread_number*per_thread;
 
         for (int j=(thread_number-1)*per_thread; j<upper_bound; j++){
-            
-            /*Face indices = mesh.faces[j];
-
-            Vec3f v0 = scene.vertex_data[indices.v0_id-1];
-            Vec3f v1 = scene.vertex_data[indices.v1_id-1];
-            Vec3f v2 = scene.vertex_data[indices.v2_id-1];
-
-            Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-            scene.meshes[i].faces[j].normal = normal;*/
-
             scene.meshes[i].faces[j].computeNormal();
         }
     }
@@ -79,15 +59,7 @@ void compute_normals(){
     int triangle_count = scene.triangles.size();
     
     for (int i=0; i<triangle_count; i++){
-
-        Face indices = scene.triangles[i].indices;
-
-        Vec3f v0 = scene.vertex_data[indices.v0_id-1];
-        Vec3f v1 = scene.vertex_data[indices.v1_id-1];
-        Vec3f v2 = scene.vertex_data[indices.v2_id-1];                  // vertices of the triangle
-
-        Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-        scene.triangles[i].indices.normal = normal;
+        scene.triangles[i].indices.computeNormal();
     }
 
     int mesh_count = scene.meshes.size();
@@ -99,15 +71,7 @@ void compute_normals(){
         int faces_count = scene.meshes[i].faces.size();
 
         for (int j=0; j<faces_count; j++){
-            
-            Face indices = mesh.faces[j];
-
-            Vec3f v0 = scene.vertex_data[indices.v0_id-1];
-            Vec3f v1 = scene.vertex_data[indices.v1_id-1];
-            Vec3f v2 = scene.vertex_data[indices.v2_id-1];
-
-            Vec3f normal = ((v2-v1) * (v0-v1)).normalize();
-            scene.meshes[i].faces[j].normal = normal;
+            scene.meshes[i].faces[j].computeNormal();
         }
     }
 
@@ -357,8 +321,6 @@ Vec3f calculate_colour(Ray& ray, int recursion_depth){
             specular = specular + specular_shading(material, normal, w_i, 
                     w_o, point_light.intensity);
         }
-
-        //normal = normal.normalize();
         w_o = w_o.normalize();
 
         Vec3f w_r = (normal * normal.dot(w_o) * 2 - w_o).normalize();
