@@ -77,7 +77,6 @@ void compute_normals(){
 
 }
 
-
 Vec3f diffuse_shading(double distance, Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity){
     double cos_theta = MAX(0, w_i.dot(normal));
     Vec3f i_over_r_squared = light_intensity * (1/(distance * distance));           // I/(r^2)
@@ -255,7 +254,7 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     return false;
 }
 
-Vec3f calculate_colour(Ray& ray, int recursion_depth){
+Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
 
     Vec3f vec;
     if (recursion_depth < 0 ) return vec;
@@ -286,7 +285,10 @@ Vec3f calculate_colour(Ray& ray, int recursion_depth){
         }
 
     if (!intersects){
-        return scene.background_color;
+        if (primary_ray)
+            return scene.background_color;
+        else
+            return Vec3f();
     }
     else{
         Vec3f intersection_pt = ray.getPoint(min_t);
@@ -314,11 +316,11 @@ Vec3f calculate_colour(Ray& ray, int recursion_depth){
                     w_o, point_light.intensity);
         }
 
-        Vec3f w_r = (normal * normal.dot(w_o) * 2 - w_o).normalize();
-        Ray reflecting_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_r);
-
-        // if (material.is_mirror)
-        //     mirror = material.mirror.elementwiseMultiplication(calculate_colour(reflecting_ray, recursion_depth-1));
+        if (material.is_mirror){
+            Vec3f w_r = ((normal * (normal.dot(w_o) * 2)) - w_o).normalize();
+            Ray reflecting_ray(intersection_pt, w_r);
+            mirror = material.mirror.elementwiseMultiplication(calculate_colour(false, reflecting_ray, recursion_depth-1));
+        }
 
         return diffuse + ambient + specular + mirror;
     }
@@ -355,7 +357,7 @@ void* trace_routine(void* row_borders){
             Vec3f s = q + (u * s_u) - (camera.up * s_v);                // s = q + u * s_u - v * s_v
             Ray primaryRay(camera.position, s - camera.position);       // d = s - e
 
-            Vec3f colour = calculate_colour(primaryRay, scene.max_recursion_depth);
+            Vec3f colour = calculate_colour(true, primaryRay, scene.max_recursion_depth);
 
             image[index++] = clamp(colour.x);
             image[index++] = clamp(colour.y);
