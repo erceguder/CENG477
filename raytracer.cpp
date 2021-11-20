@@ -78,15 +78,9 @@ void compute_normals(){
 }
 
 
-Vec3f diffuse_shading(Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity){//, double distance){
-    double distance = w_i.length();
-    
-    Vec3f wi = w_i.normalize();
-    Vec3f n = normal.normalize();                   // two lines can be omitted if parameters are given normalized
-
-    double cos_theta = MAX(0, wi.dot(n));
+Vec3f diffuse_shading(double distance, Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity){
+    double cos_theta = MAX(0, w_i.dot(normal));
     Vec3f i_over_r_squared = light_intensity * (1/(distance * distance));           // I/(r^2)
-    
     return (diffuse_coeff * cos_theta).elementwiseMultiplication(i_over_r_squared);
 }
 
@@ -94,20 +88,15 @@ Vec3f ambient_shading(Vec3f ambient_coeff, Vec3f radiance){
     return ambient_coeff.elementwiseMultiplication(radiance);
 }
 
-Vec3f specular_shading(Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity){//, double distance){
-    double distance = w_i.length();
+Vec3f specular_shading(double distance, Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity){
     Vec3f res;
-    
-    Vec3f wi = w_i.normalize();
-    Vec3f wo = w_o.normalize();
-    //Vec3f n = normal.normalize();
 
-    double cos_theta = wi.dot(normal);// * (1/(wi.length() * normal.length()));       // if the light is coming from behind the surface
+    double cos_theta = w_i.dot(normal);
     double theta = acos(cos_theta) * 180.0 / PI;
     if (theta >= 90)
         return res;
     
-    Vec3f wi_plus_wo = wi + wo;
+    Vec3f wi_plus_wo = w_i + w_o;
     Vec3f half = wi_plus_wo * (1/wi_plus_wo.length());
 
     double cos_alpha = pow(MAX(0, normal.dot(half)), material.phong_exponent);
@@ -135,15 +124,15 @@ bool triangle_intersects(bool bfc, Ray ray, Face face, double* min_t, Vec3f* nor
 
     Vec3f v_p = (p - b) * (a - b);
     Vec3f v_c = (c - b) * (a - b);
-    if (v_p.dot(v_c) < (-1e-12)) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     v_p = (p - a) * (c - a);
     v_c = (b - a) * (c - a);
-    if (v_p.dot(v_c) < (-1e-12)) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     v_p = (p - c) * (b - c);
     v_c = (a - c) * (b - c);
-    if (v_p.dot(v_c) < (-1e-12)) return false;
+    if (v_p.dot(v_c) < 0) return false;
 
     if (t < *min_t && t > 0){
         *min_t = t;
@@ -200,7 +189,7 @@ bool triangle_intersects(bool bfc, Ray ray, Face face, double* min_t, Vec3f* nor
     double t = determinant(A_3) / det_A;
 
     if (beta >= 0 && gamma >= 0 && (beta + gamma) <= 1)
-        if (t < *min_t){
+        if (t < *min_t && t > 0){
             *min_t = t;
             *normal_p = face.normal;
 
@@ -247,7 +236,7 @@ int clamp(double val){
 
 bool in_shadow(Ray shadow_ray, PointLight light){
     
-    double t_to_light = (light.position - shadow_ray.getOrigin()).length() / 1;//shadow_ray.getDirection().length();
+    double t_to_light = (light.position - shadow_ray.getOrigin()).length() / 1;
     Vec3f dummy_normal;
 
     for (auto sphere: scene.spheres)
@@ -269,7 +258,7 @@ bool in_shadow(Ray shadow_ray, PointLight light){
 Vec3f calculate_colour(Ray& ray, int recursion_depth){
 
     Vec3f vec;
-    if (recursion_depth-- < 0 ) return vec;
+    if (recursion_depth < 0 ) return vec;
     
     bool intersects = false;
     double min_t = numeric_limits<double>::max();
@@ -307,27 +296,29 @@ Vec3f calculate_colour(Ray& ray, int recursion_depth){
         Vec3f specular;
         Vec3f mirror;
 
-        Vec3f w_o = camera.position - intersection_pt;
+        Vec3f w_o = (camera.position - intersection_pt).normalize();
 
         for (auto point_light: scene.point_lights){
             Vec3f w_i = point_light.position - intersection_pt;
 
-            Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i.normalize());
+            double distance = w_i.length();
+            w_i = w_i.normalize();
+
+            Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i);
             if (in_shadow(shadow_ray, point_light)) continue;
 
-            diffuse = diffuse + diffuse_shading(material.diffuse, w_i, 
+            diffuse = diffuse + diffuse_shading(distance, material.diffuse, w_i, 
                     normal, point_light.intensity);
 
-            specular = specular + specular_shading(material, normal, w_i, 
+            specular = specular + specular_shading(distance, material, normal, w_i, 
                     w_o, point_light.intensity);
         }
-        w_o = w_o.normalize();
 
         Vec3f w_r = (normal * normal.dot(w_o) * 2 - w_o).normalize();
         Ray reflecting_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_r);
 
         // if (material.is_mirror)
-        //     mirror = material.mirror.elementwiseMultiplication(calculate_colour(reflecting_ray, recursion_depth));
+        //     mirror = material.mirror.elementwiseMultiplication(calculate_colour(reflecting_ray, recursion_depth-1));
 
         return diffuse + ambient + specular + mirror;
     }
