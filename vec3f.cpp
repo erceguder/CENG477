@@ -68,3 +68,16 @@ ostream& operator<<(ostream& os, const Vec3f& vec){
     os << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")";
     return os;
 }
+
+Vec3f Vec3f::clamp(){
+    this->x = this->x > 255 ? 255: this->x;
+    this->x = this->x < 0 ? 0: this->x;
+
+    this->y = this->y > 255 ? 255: this->y;
+    this->y = this->y < 0 ? 0: this->y;
+
+    this->z = this->z > 255 ? 255: this->z;
+    this->z = this->z < 0 ? 0: this->z;
+
+    return *this;
+}

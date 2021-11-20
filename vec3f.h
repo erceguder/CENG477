@@ -15,16 +15,18 @@ class Vec3f
         Vec3f operator+(Vec3f obj);
         Vec3f operator-(Vec3f obj);
         Vec3f operator-(void);
-        Vec3f operator*(Vec3f obj);    // cross product
-        Vec3f operator*(double c);      // scalar multiplication
+        Vec3f operator*(Vec3f obj);                     // cross product
+        Vec3f operator*(double c);                      // scalar multiplication
 
         friend ostream& operator<<(ostream& os, const Vec3f& vec);
 
         //Vec3f scalarMultiplication(double c);
         double dot(Vec3f obj);
-        Vec3f normalize();                   // get unit vector
+        Vec3f normalize();                              // get unit vector
         Vec3f elementwiseMultiplication(Vec3f obj);     //element-wise matrix multiplication
-        double length();                         // get vector's length
+        double length();                                // get vector's length
+
+        Vec3f clamp();
 };
 
 

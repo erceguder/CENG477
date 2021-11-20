@@ -2,6 +2,7 @@
 #define __FACE_H__
 
 #include "vec3f.h"
+#include "ray.h"
 
 class Face{
     public:
@@ -11,6 +12,7 @@ class Face{
         Vec3f normal;
 
         void computeNormal();
+        bool intersects(bool bfc, Ray ray, double& min_t, Vec3f& normal);
 };
 
 #endif

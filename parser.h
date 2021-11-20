@@ -5,6 +5,7 @@
 #include <vector>
 #include "vec3f.h"
 #include "face.h"
+#include "sphere.h"
 
 namespace parser
 {
@@ -38,33 +39,16 @@ namespace parser
         double phong_exponent;
     };
 
-    // struct Face
-    // {
-    //     int v0_id;
-    //     int v1_id;
-    //     int v2_id;
-    //     Vec3f normal;
-    // };
-
     struct Mesh
     {
         int material_id;
         std::vector<Face> faces;
-        // std::vector<Vec3f> normals;
     };
 
     struct Triangle
     {
         int material_id;
         Face indices;
-        // Vec3f normal;
-    };
-
-    struct Sphere
-    {
-        int material_id;
-        int center_vertex_id;
-        double radius;
     };
 
     struct Scene
