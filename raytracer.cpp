@@ -110,22 +110,19 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     double t_to_light = (light.position - shadow_ray.getOrigin()).length();
     Vec3f dummy_normal;
 
-    for (auto sphere: scene.spheres)
-        // if (sphere_intersects(shadow_ray, sphere, &t_to_light, &dummy_normal))
-        if(sphere.intersects(shadow_ray, t_to_light, dummy_normal))
+    for (int i=0; i < scene.spheres.size(); i++)
+        if(scene.spheres[i].intersects(shadow_ray, t_to_light, dummy_normal))
             return true;
     
-    for (auto triangle: scene.triangles)
-        // if (triangle_intersects(false, shadow_ray, triangle.indices, &t_to_light, &dummy_normal))
-        if (triangle.indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
+    for (int i=0; i < scene.triangles.size(); i++)
+        if (scene.triangles[i].indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
             return true;
     
-    for (auto mesh: scene.meshes)
-        for (auto face: mesh.faces){
-            // if (triangle_intersects(false, shadow_ray, face, &t_to_light, &dummy_normal))
-            if (face.intersects(false, shadow_ray, t_to_light, dummy_normal))
+    for (int i=0; i < scene.meshes.size(); i++)
+        for (int j=0; j < scene.meshes[i].faces.size(); j++)
+            if(scene.meshes[i].faces[j].intersects(false, shadow_ray, t_to_light, dummy_normal))
                 return true;
-        }
+
     return false;
 }
 
@@ -138,25 +135,23 @@ Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_
     Vec3f normal;                                               // normal at intersection point
     Material material;
 
-    for (auto sphere: scene.spheres)
-        if(sphere.intersects(ray, min_t, normal)){
-            material = scene.materials[sphere.material_id-1];
+    for (int i=0; i < scene.spheres.size(); i++)
+        if(scene.spheres[i].intersects(ray, min_t, normal)){
+            material = scene.materials[scene.spheres[i].material_id-1];
             intersects = true;
         }
 
-    for (auto triangle: scene.triangles)
-        if(triangle.indices.intersects(true, ray, min_t, normal)){
-            material = scene.materials[triangle.material_id-1];
+    for (int i=0; i < scene.triangles.size(); i++)
+        if(scene.triangles[i].indices.intersects(true, ray, min_t, normal)){
+            material = scene.materials[scene.triangles[i].material_id-1];
             intersects = true;
         }
 
-    for (auto mesh: scene.meshes)
-        for (auto face: mesh.faces){
-            if(face.intersects(true, ray, min_t, normal)){
-                material = scene.materials[mesh.material_id-1];
+    for (int i=0; i < scene.meshes.size(); i++)
+        for (int j=0; j < scene.meshes[i].faces.size(); j++)
+            if(scene.meshes[i].faces[j].intersects(true, ray, min_t, normal))
+                material = scene.materials[scene.meshes[i].material_id-1];
                 intersects = true;
-            }
-        }
 
     if (!intersects){
         if (primary_ray)
@@ -250,10 +245,10 @@ int main(int argc, char* argv[]){
     scene.loadFromXml(argv[1]);
     pthread_t threads[NUM_THREAD];
 
-    int NUM_THREADbers[NUM_THREAD] = {1, 2, 3, 4};
+    int thread_numbers[NUM_THREAD] = {1, 2, 3, 4};
 
     // for (int i=0; i < NUM_THREAD; i++)
-    //     pthread_create(&threads[i], NULL, compute_normal_routine, &NUM_THREADbers[i]);
+    //     pthread_create(&threads[i], NULL, compute_normal_routine, &thread_numbers[i]);
 
     // for (int i=0; i < NUM_THREAD; i++)
     //     pthread_join(threads[i], NULL);
