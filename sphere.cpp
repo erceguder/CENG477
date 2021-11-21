@@ -10,12 +10,13 @@ bool Sphere::intersects(Ray ray, double& min_t, Vec3f& normal){
         Returns true if the sphere is the closest object to the camera.
     */
     Vec3f center = scene.vertex_data[this->center_vertex_id - 1];
+    Vec3f ray_direction = ray.getDirection();
 
     Vec3f o_minus_c = ray.getOrigin() - center;                               // o - c
-    double d_dot_o_minus_c = ray.getDirection().dot(o_minus_c);               // d . (o - c)
-    double d_dot_d = ray.getDirection().dot(ray.getDirection());              // d . d
+    double d_dot_o_minus_c = ray_direction.dot(o_minus_c);               // d . (o - c)
+    double d_dot_d = ray_direction.dot(ray_direction);              // d . d
 
-    double sqrt_discr = sqrt( pow(d_dot_o_minus_c, 2) - d_dot_d * (o_minus_c.dot(o_minus_c) - pow(this->radius, 2)) );
+    double sqrt_discr = sqrt( d_dot_o_minus_c*d_dot_o_minus_c - d_dot_d * (o_minus_c.dot(o_minus_c) - this->radius*this->radius));
 
     if (!isnan(sqrt_discr)){  // ray and sphere intersect
         double t_1 = (-d_dot_o_minus_c - sqrt_discr) / d_dot_d;

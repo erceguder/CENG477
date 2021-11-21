@@ -24,16 +24,16 @@ Camera camera;
 
 void* compute_normal_routine(void* arg){
 
-    int NUM_THREADber = *((int*)arg);
+    int thread_number = *((int*)arg);
 
     int triangle_count = scene.triangles.size();
     int mesh_count = scene.meshes.size();
 
     int per_thread = triangle_count/NUM_THREAD;
     
-    int upper_bound = (NUM_THREADber == NUM_THREAD) ? triangle_count: NUM_THREADber*per_thread;
+    int upper_bound = (thread_number == NUM_THREAD) ? triangle_count: thread_number*per_thread;
 
-    for (int i=(NUM_THREADber-1)*per_thread; i<upper_bound; i++){
+    for (int i=(thread_number-1)*per_thread; i<upper_bound; i++){
         scene.triangles[i].indices.computeNormal();
     }
 
@@ -44,9 +44,9 @@ void* compute_normal_routine(void* arg){
         int faces_count = scene.meshes[i].faces.size();
 
         per_thread = faces_count/NUM_THREAD;
-        upper_bound = (NUM_THREADber == NUM_THREAD) ? faces_count: NUM_THREADber*per_thread;
+        upper_bound = (thread_number == NUM_THREAD) ? faces_count: thread_number*per_thread;
 
-        for (int j=(NUM_THREADber-1)*per_thread; j<upper_bound; j++){
+        for (int j=(thread_number-1)*per_thread; j<upper_bound; j++){
             scene.meshes[i].faces[j].computeNormal();
         }
     }
@@ -110,23 +110,50 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     double t_to_light = (light.position - shadow_ray.getOrigin()).length();
     Vec3f dummy_normal;
 
-    for (int i=0; i < scene.spheres.size(); i++)
-        if(scene.spheres[i].intersects(shadow_ray, t_to_light, dummy_normal))
+    // for (auto sphere: scene.spheres)
+    //     if(sphere.intersects(shadow_ray, t_to_light, dummy_normal))
+    //         return true;
+
+    for (int i=0; i < scene.spheres.size(); i++){
+        Sphere* sphere = &scene.spheres[i];
+
+        if (sphere->intersects(shadow_ray, t_to_light, dummy_normal))
             return true;
+    }
     
-    for (int i=0; i < scene.triangles.size(); i++)
-        if (scene.triangles[i].indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
+    // for (auto triangle: scene.triangles)
+    //     if (triangle.indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
+    //         return true;
+
+    for (int i=0; i < scene.triangles.size(); i++){
+        Triangle* triangle = &scene.triangles[i];
+
+        if (triangle->indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
             return true;
+    }
     
-    for (int i=0; i < scene.meshes.size(); i++)
-        for (int j=0; j < scene.meshes[i].faces.size(); j++)
-            if(scene.meshes[i].faces[j].intersects(false, shadow_ray, t_to_light, dummy_normal))
+    // for (auto mesh: scene.meshes)
+    //     for (auto face: mesh.faces){
+    //         if (face.intersects(false, shadow_ray, t_to_light, dummy_normal))
+    //             return true;
+    //     }
+
+    for (int i=0; i < scene.meshes.size(); i++){
+        Mesh* mesh = &scene.meshes[i];
+        int face_count = mesh->faces.size();
+
+        for (int j=0; j < face_count; j++){
+            Face* face = &mesh->faces[j];
+
+            if (face->intersects(false, shadow_ray, t_to_light, dummy_normal))
                 return true;
+        }
+    }
 
     return false;
 }
 
-Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_depth){
+Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
 
     if (recursion_depth < 0 ) return Vec3f(0, 0, 0);
     
@@ -135,23 +162,57 @@ Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_
     Vec3f normal;                                               // normal at intersection point
     Material material;
 
-    for (int i=0; i < scene.spheres.size(); i++)
-        if(scene.spheres[i].intersects(ray, min_t, normal)){
-            material = scene.materials[scene.spheres[i].material_id-1];
+    // for (auto sphere: scene.spheres)
+    //     if(sphere.intersects(ray, min_t, normal)){
+    //         material = scene.materials[sphere.material_id-1];
+    //         intersects = true;
+    //     }
+
+    for (int i=0; i < scene.spheres.size(); i++){
+        Sphere* sphere = &scene.spheres[i];
+
+        if (sphere->intersects(ray, min_t, normal)){
+            material = scene.materials[sphere->material_id - 1];
             intersects = true;
         }
+    }
 
-    for (int i=0; i < scene.triangles.size(); i++)
-        if(scene.triangles[i].indices.intersects(true, ray, min_t, normal)){
-            material = scene.materials[scene.triangles[i].material_id-1];
+    // for (auto triangle: scene.triangles)
+    //     if(triangle.indices.intersects(true, ray, min_t, normal)){
+    //         material = scene.materials[triangle.material_id-1];
+    //         intersects = true;
+    //     }
+
+    for (int i=0; i < scene.triangles.size(); i++){
+        Triangle* triangle = &scene.triangles[i];
+
+        if (triangle->indices.intersects(true, ray, min_t, normal)){
+            material = scene.materials[triangle->material_id-1];
             intersects = true;
         }
+    }
 
-    for (int i=0; i < scene.meshes.size(); i++)
-        for (int j=0; j < scene.meshes[i].faces.size(); j++)
-            if(scene.meshes[i].faces[j].intersects(true, ray, min_t, normal))
-                material = scene.materials[scene.meshes[i].material_id-1];
+    // for (auto mesh: scene.meshes)
+    //     for (auto face: mesh.faces){
+    //         if(face.intersects(true, ray, min_t, normal)){
+    //             material = scene.materials[mesh.material_id-1];
+    //             intersects = true;
+    //         }
+    //     }
+
+    for (int i=0; i < scene.meshes.size(); i++){
+        Mesh* mesh = &scene.meshes[i];
+        int face_count = mesh->faces.size();
+
+        for (int j=0; j < face_count; j++){
+            Face* face = &mesh->faces[j];
+
+            if (face->intersects(true, ray, min_t, normal)){
+                material = scene.materials[mesh->material_id-1];
                 intersects = true;
+            }
+        }
+    }
 
     if (!intersects){
         if (primary_ray)
@@ -161,13 +222,14 @@ Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_
     }
     else{
         Vec3f intersection_pt = ray.getPoint(min_t);
+        Vec3f lifted_intersection_pt = intersection_pt + (normal*scene.shadow_ray_epsilon);
 
         Vec3f ambient = ambient_shading(material.ambient, scene.ambient_light);
         Vec3f diffuse;
         Vec3f specular;
         Vec3f mirror;
 
-        Vec3f w_o = primary_ray ? (camera.position - intersection_pt).normalize() : (-old_w_r);
+        Vec3f w_o = primary_ray ? (camera.position - intersection_pt).normalize() : (-ray.getDirection());
 
         for (auto point_light: scene.point_lights){
             Vec3f w_i = point_light.position - intersection_pt;
@@ -175,7 +237,7 @@ Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_
             double distance = w_i.length();
             w_i = w_i.normalize();
 
-            Ray shadow_ray(intersection_pt + (normal*scene.shadow_ray_epsilon), w_i);
+            Ray shadow_ray(lifted_intersection_pt, w_i);
             if (in_shadow(shadow_ray, point_light)) continue;
 
             diffuse = diffuse + diffuse_shading(distance, material.diffuse, w_i, 
@@ -187,8 +249,8 @@ Vec3f calculate_colour(bool primary_ray, Vec3f old_w_r, Ray& ray, int recursion_
 
         if (material.is_mirror){
             Vec3f w_r = ((normal * (normal.dot(w_o) * 2)) - w_o).normalize();
-            Ray reflecting_ray(intersection_pt, w_r);
-            mirror = material.mirror.elementwiseMultiplication(calculate_colour(false, w_r, reflecting_ray, recursion_depth-1));
+            Ray reflecting_ray(lifted_intersection_pt, w_r);
+            mirror = material.mirror.elementwiseMultiplication(calculate_colour(false, reflecting_ray, recursion_depth-1));
         }
 
         return diffuse + ambient + specular + mirror;
@@ -226,7 +288,7 @@ void* trace_routine(void* row_borders){
             Vec3f s = q + (u * s_u) - (camera.up * s_v);                // s = q + u * s_u - v * s_v
             Ray primaryRay(camera.position, s - camera.position);       // d = s - e
 
-            Vec3f colour = calculate_colour(true, Vec3f(0, 0, 0), primaryRay, scene.max_recursion_depth);
+            Vec3f colour = calculate_colour(true, primaryRay, scene.max_recursion_depth);
 
             colour.clamp();
 
@@ -247,13 +309,13 @@ int main(int argc, char* argv[]){
 
     int thread_numbers[NUM_THREAD] = {1, 2, 3, 4};
 
-    // for (int i=0; i < NUM_THREAD; i++)
-    //     pthread_create(&threads[i], NULL, compute_normal_routine, &thread_numbers[i]);
+    for (int i=0; i < NUM_THREAD; i++)
+        pthread_create(&threads[i], NULL, compute_normal_routine, &thread_numbers[i]);
 
-    // for (int i=0; i < NUM_THREAD; i++)
-    //     pthread_join(threads[i], NULL);
+    for (int i=0; i < NUM_THREAD; i++)
+        pthread_join(threads[i], NULL);
 
-    compute_normals();
+    // compute_normals();
 
     for (int i=0; i < scene.cameras.size(); i++){
 
@@ -291,7 +353,6 @@ int main(int argc, char* argv[]){
         write_ppm(camera.image_name.c_str(), image, camera.image_width, camera.image_height);
 
         delete [] image;
-
     }
     auto t_end = chrono::high_resolution_clock::now();
     cout << chrono::duration<double, milli>(t_end - t_start).count() / 1000 << endl;

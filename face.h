@@ -9,6 +9,8 @@ class Face{
         int v0_id;
         int v1_id;
         int v2_id;
+
+        Vec3f v0, v1, v2;
         Vec3f normal;
 
         void computeNormal();

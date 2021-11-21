@@ -6,36 +6,35 @@ using namespace parser;
 extern Scene scene;
 
 void Face::computeNormal(){
-    Vec3f v0 = scene.vertex_data[this->v0_id-1];
-    Vec3f v1 = scene.vertex_data[this->v1_id-1];
-    Vec3f v2 = scene.vertex_data[this->v2_id-1];
+    this->v0 = scene.vertex_data[this->v0_id-1];
+    this->v1 = scene.vertex_data[this->v1_id-1];
+    this->v2 = scene.vertex_data[this->v2_id-1];
 
     this->normal = ((v2-v1) * (v0-v1)).normalize();
 }
 
 bool Face::intersects(bool bfc, Ray ray, double& min_t, Vec3f& normal){
-    Vec3f a = scene.vertex_data[this->v0_id - 1];
-    Vec3f b = scene.vertex_data[this->v1_id - 1];
-    Vec3f c = scene.vertex_data[this->v2_id - 1];
+    Vec3f ray_direction = ray.getDirection();
+    double normal_dot_ray_direction = this->normal.dot(ray_direction);
 
-    if (bfc && (this->normal.dot(ray.getDirection()) > 0)) return false;   // Back-face culling
+    if (bfc && (normal_dot_ray_direction > 0)) return false;   // Back-face culling
 
-    if (ray.getDirection().dot(this->normal) == 0) return false;  // floating point precision loss ?
+    if (normal_dot_ray_direction == 0) return false;  // floating point precision loss ?
 
-    double t = ((a - ray.getOrigin()).dot(this->normal)) / (ray.getDirection().dot(this->normal));
+    double t = ((v0 - ray.getOrigin()).dot(this->normal)) / (normal_dot_ray_direction);
 
     Vec3f p = ray.getPoint(t);
 
-    Vec3f v_p = (p - b) * (a - b);
-    Vec3f v_c = (c - b) * (a - b);
+    Vec3f v_p = (p - v1) * (v0 - v1);
+    Vec3f v_c = (v2 - v1) * (v0 - v1);
     if (v_p.dot(v_c) < 0) return false;
 
-    v_p = (p - a) * (c - a);
-    v_c = (b - a) * (c - a);
+    v_p = (p - v0) * (v2 - v0);
+    v_c = (v1 - v0) * (v2 - v0);
     if (v_p.dot(v_c) < 0) return false;
 
-    v_p = (p - c) * (b - c);
-    v_c = (a - c) * (b - c);
+    v_p = (p - v2) * (v1 - v2);
+    v_c = (v0 - v2) * (v1 - v2);
     if (v_p.dot(v_c) < 0) return false;
 
     if (t < min_t && t > 0){
