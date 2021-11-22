@@ -1,5 +1,5 @@
 all: *.cpp
-	g++ *.cpp -o raytracer -pthread -std=c++11 -O3
+	g++ *.cpp -o raytracer -pthread -std=c++11 -Ofast -march=native
 
 output:
 	./raytracer sample_scenes/inputs/$(name).xml
