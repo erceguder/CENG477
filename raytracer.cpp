@@ -161,6 +161,8 @@ Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
     double min_t = numeric_limits<double>::max();
     Vec3f normal;                                               // normal at intersection point
     Material material;
+    // vector<Mesh> meshes = scene.meshes;
+    // vector<Sphere> spheres = scene.spheres;
 
     // for (auto sphere: scene.spheres)
     //     if(sphere.intersects(ray, min_t, normal)){
@@ -276,17 +278,23 @@ void* trace_routine(void* row_borders){
     double pixel_width = (right - left) / image_width;
     double pixel_height = (top - bottom) / image_height;
 
-    Vec3f m = camera.position + (camera.gaze * camera.near_distance);   // m = e + gaze*distance
-    Vec3f u = camera.gaze * camera.up;                                  // u = (-w) x v
-    Vec3f q = m + (u * left) + (camera.up * top);                       // q = m + u*l + v*t
+    Vec3f cg = camera.gaze;
+    Vec3f cu = camera.up;
+    Vec3f cp = camera.position;
+    Vec3f cn = camera.near_distance;
 
-    for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
-        for (int i=0; i < image_width; i++){                            // columns
+    Vec3f m = cp + (cg * cn);  						 // m = e + gaze*distance
+    Vec3f u = cg * cu;                                  		 // u = (-w) x v
+    Vec3f q = m + (u * left) + (cu * top);                       	 // q = m + u*l + v*t
+
+    for (int j=start_row; j <= end_row; j++){                            // rows [start, end]
+	    double s_v = (j + .5) * pixel_height;
+
+        for (int i=0; i < image_width; i++){                             // columns
             double s_u = (i + .5) * pixel_width;
-            double s_v = (j + .5) * pixel_height;
 
-            Vec3f s = q + (u * s_u) - (camera.up * s_v);                // s = q + u * s_u - v * s_v
-            Ray primaryRay(camera.position, s - camera.position);       // d = s - e
+            Vec3f s = q + (u * s_u) - (cu * s_v);                	 // s = q + u * s_u - v * s_v
+            Ray primaryRay(cp, s - cp);       				 // d = s - e
 
             Vec3f colour = calculate_colour(true, primaryRay, scene.max_recursion_depth);
 
