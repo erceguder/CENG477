@@ -4,7 +4,6 @@
 using namespace parser;
 
 extern Scene scene;
-extern Camera camera;
 
 void Face::computeNormal(){
     this->v0 = scene.vertex_data[this->v0_id-1];
@@ -56,6 +55,8 @@ bool Face::intersects(bool bfc, const Ray& ray, double& min_t, Vec3f& normal) co
 
     Vec3f direction = ray.getDirection();
     Vec3f origin = ray.getOrigin();
+
+    if (bfc && (this->normal.dot(direction) > 0)) return false;   // Back-face culling
 
     Vec3f v0_minus_v1 = v0-v1;
     Vec3f v0_minus_v2 = v0-v2;
