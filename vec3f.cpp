@@ -1,6 +1,6 @@
 #include "vec3f.h"
 
-Vec3f Vec3f::operator+(Vec3f obj){
+Vec3f Vec3f::operator+(Vec3f obj) const{
     Vec3f res;
     res.x = this->x + obj.x;
     res.y = this->y + obj.y;
@@ -8,7 +8,7 @@ Vec3f Vec3f::operator+(Vec3f obj){
     return res;
 }
 
-Vec3f Vec3f::operator-(Vec3f obj){
+Vec3f Vec3f::operator-(Vec3f obj) const{
     Vec3f res;
     res.x = this->x - obj.x;
     res.y = this->y - obj.y;
@@ -16,11 +16,11 @@ Vec3f Vec3f::operator-(Vec3f obj){
     return res;
 }
 
-Vec3f Vec3f::operator-(void){
+Vec3f Vec3f::operator-(void) const{
     return Vec3f(-(this->x), -(this->y), -(this->z));
 }
 
-Vec3f Vec3f::operator*(Vec3f obj){
+Vec3f Vec3f::operator*(Vec3f obj) const{
     Vec3f res;
     res.x = this->y * obj.z - this->z * obj.y;
     res.y = this->z * obj.x - this->x * obj.z;
@@ -28,7 +28,7 @@ Vec3f Vec3f::operator*(Vec3f obj){
     return res;
 }
 
-Vec3f Vec3f::operator*(double c){
+Vec3f Vec3f::operator*(double c) const{
     Vec3f res;
     res.x = this->x * c;
     res.y = this->y * c;
@@ -36,9 +36,9 @@ Vec3f Vec3f::operator*(double c){
     return res;
 }
 
-Vec3f Vec3f::normalize(){
+Vec3f Vec3f::normalize() const{
     Vec3f res;
-    double length = sqrt(this->dot(*this)); //sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+    double length = sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
     
     // LENGTH == 0 ???
     
@@ -48,11 +48,11 @@ Vec3f Vec3f::normalize(){
     return res;
 }
 
-double Vec3f::dot(Vec3f obj){
+double Vec3f::dot(Vec3f obj) const{
     return this->x * obj.x + this->y * obj.y + this->z * obj.z;
 }
 
-Vec3f Vec3f::elementwiseMultiplication(Vec3f obj){
+Vec3f Vec3f::elementwiseMultiplication(Vec3f obj) const{
     Vec3f res;
     res.x = this->x * obj.x;
     res.y = this->y * obj.y;
@@ -60,7 +60,7 @@ Vec3f Vec3f::elementwiseMultiplication(Vec3f obj){
     return res;
 }
 
-double Vec3f::length(){
+double Vec3f::length() const{
     return sqrt(this->x*this->x + this->y*this->y + this->z*this->z);
 }
 

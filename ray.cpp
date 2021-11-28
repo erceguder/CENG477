@@ -8,11 +8,7 @@ Vec3f Ray::getOrigin() const { return this->origin; }
 
 Vec3f Ray::getDirection() const { return this->direction; }
 
-void Ray::setOrigin(Vec3f origin) {this->origin = origin; }
-
-void Ray::setDirection(Vec3f direction) { this->direction = direction; }
-
-Vec3f Ray::getPoint(double distance){
+Vec3f Ray::getPoint(double distance) const{
     return origin + direction * distance;
 }
 

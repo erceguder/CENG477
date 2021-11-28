@@ -10,7 +10,7 @@ class Sphere{
         int center_vertex_id;
         double radius;
 
-        bool intersects(Ray ray, double& min_t, Vec3f& normal);
+        bool intersects(const Ray& ray, double& min_t, Vec3f& normal) const;
 };
 
 #endif

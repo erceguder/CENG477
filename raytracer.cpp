@@ -76,17 +76,17 @@ void compute_normals(){
 
 }
 
-Vec3f diffuse_shading(double distance, Vec3f diffuse_coeff, Vec3f w_i, Vec3f normal, Vec3f light_intensity){
+Vec3f diffuse_shading(double distance, const Vec3f& diffuse_coeff, const Vec3f& w_i, const Vec3f& normal, const Vec3f& light_intensity){
     double cos_theta = MAX(0, w_i.dot(normal));
     Vec3f i_over_r_squared = light_intensity * (1/(distance * distance));           // I/(r^2)
     return (diffuse_coeff * cos_theta).elementwiseMultiplication(i_over_r_squared);
 }
 
-Vec3f ambient_shading(Vec3f ambient_coeff, Vec3f radiance){
+Vec3f ambient_shading(const Vec3f& ambient_coeff, const Vec3f& radiance){
     return ambient_coeff.elementwiseMultiplication(radiance);
 }
 
-Vec3f specular_shading(double distance, Material material, Vec3f normal, Vec3f w_i, Vec3f w_o, Vec3f light_intensity){
+Vec3f specular_shading(double distance, const Material& material, const Vec3f& normal, const Vec3f& w_i, const Vec3f& w_o, const Vec3f& light_intensity){
     Vec3f res;
 
     double cos_theta = w_i.dot(normal);
@@ -105,14 +105,10 @@ Vec3f specular_shading(double distance, Material material, Vec3f normal, Vec3f w
     return res;
 }
 
-bool in_shadow(Ray shadow_ray, PointLight light){
+bool in_shadow(const Ray& shadow_ray, const PointLight& light){
     
     double t_to_light = (light.position - shadow_ray.getOrigin()).length();
     Vec3f dummy_normal;
-
-    // for (auto sphere: scene.spheres)
-    //     if(sphere.intersects(shadow_ray, t_to_light, dummy_normal))
-    //         return true;
 
     for (int i=0; i < scene.spheres.size(); i++){
         Sphere* sphere = &scene.spheres[i];
@@ -120,10 +116,6 @@ bool in_shadow(Ray shadow_ray, PointLight light){
         if (sphere->intersects(shadow_ray, t_to_light, dummy_normal))
             return true;
     }
-    
-    // for (auto triangle: scene.triangles)
-    //     if (triangle.indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
-    //         return true;
 
     for (int i=0; i < scene.triangles.size(); i++){
         Triangle* triangle = &scene.triangles[i];
@@ -131,12 +123,6 @@ bool in_shadow(Ray shadow_ray, PointLight light){
         if (triangle->indices.intersects(false, shadow_ray, t_to_light, dummy_normal))
             return true;
     }
-    
-    // for (auto mesh: scene.meshes)
-    //     for (auto face: mesh.faces){
-    //         if (face.intersects(false, shadow_ray, t_to_light, dummy_normal))
-    //             return true;
-    //     }
 
     for (int i=0; i < scene.meshes.size(); i++){
         Mesh* mesh = &scene.meshes[i];
@@ -153,7 +139,7 @@ bool in_shadow(Ray shadow_ray, PointLight light){
     return false;
 }
 
-Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
+Vec3f calculate_colour(bool primary_ray, const Ray& ray, int recursion_depth){
 
     if (recursion_depth < 0 ) return Vec3f(0, 0, 0);
     
@@ -161,14 +147,6 @@ Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
     double min_t = numeric_limits<double>::max();
     Vec3f normal;                                               // normal at intersection point
     Material material;
-    // vector<Mesh> meshes = scene.meshes;
-    // vector<Sphere> spheres = scene.spheres;
-
-    // for (auto sphere: scene.spheres)
-    //     if(sphere.intersects(ray, min_t, normal)){
-    //         material = scene.materials[sphere.material_id-1];
-    //         intersects = true;
-    //     }
 
     for (int i=0; i < scene.spheres.size(); i++){
         Sphere* sphere = &scene.spheres[i];
@@ -179,12 +157,6 @@ Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
         }
     }
 
-    // for (auto triangle: scene.triangles)
-    //     if(triangle.indices.intersects(true, ray, min_t, normal)){
-    //         material = scene.materials[triangle.material_id-1];
-    //         intersects = true;
-    //     }
-
     for (int i=0; i < scene.triangles.size(); i++){
         Triangle* triangle = &scene.triangles[i];
 
@@ -193,14 +165,6 @@ Vec3f calculate_colour(bool primary_ray, Ray& ray, int recursion_depth){
             intersects = true;
         }
     }
-
-    // for (auto mesh: scene.meshes)
-    //     for (auto face: mesh.faces){
-    //         if(face.intersects(true, ray, min_t, normal)){
-    //             material = scene.materials[mesh.material_id-1];
-    //             intersects = true;
-    //         }
-    //     }
 
     for (int i=0; i < scene.meshes.size(); i++){
         Mesh* mesh = &scene.meshes[i];
@@ -278,23 +242,23 @@ void* trace_routine(void* row_borders){
     double pixel_width = (right - left) / image_width;
     double pixel_height = (top - bottom) / image_height;
 
-    Vec3f cg = camera.gaze;
-    Vec3f cu = camera.up;
-    Vec3f cp = camera.position;
-    Vec3f cn = camera.near_distance;
+    Vec3f up = camera.up;
+    Vec3f cam_pos = camera.position;
+    Vec3f gaze = camera.gaze;
 
-    Vec3f m = cp + (cg * cn);  						 // m = e + gaze*distance
-    Vec3f u = cg * cu;                                  		 // u = (-w) x v
-    Vec3f q = m + (u * left) + (cu * top);                       	 // q = m + u*l + v*t
+    Vec3f m = cam_pos + (gaze * camera.near_distance);                  // m = e + gaze*distance
+    Vec3f u = gaze * up;                                                // u = (-w) x v
+    Vec3f q = m + (u * left) + (up * top);                              // q = m + u*l + v*t
 
-    for (int j=start_row; j <= end_row; j++){                            // rows [start, end]
-	    double s_v = (j + .5) * pixel_height;
+    for (int j=start_row; j <= end_row; j++){                           // rows [start, end]
+        
+        double s_v = (j + .5) * pixel_height;
 
-        for (int i=0; i < image_width; i++){                             // columns
+        for (int i=0; i < image_width; i++){                            // columns
             double s_u = (i + .5) * pixel_width;
 
-            Vec3f s = q + (u * s_u) - (cu * s_v);                	 // s = q + u * s_u - v * s_v
-            Ray primaryRay(cp, s - cp);       				 // d = s - e
+            Vec3f s = q + (u * s_u) - (up * s_v);                       // s = q + u * s_u - v * s_v
+            Ray primaryRay(cam_pos, s - cam_pos);                       // d = s - e
 
             Vec3f colour = calculate_colour(true, primaryRay, scene.max_recursion_depth);
 

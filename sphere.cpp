@@ -5,7 +5,7 @@ using namespace parser;
 
 extern Scene scene;
 
-bool Sphere::intersects(Ray ray, double& min_t, Vec3f& normal){
+bool Sphere::intersects(const Ray& ray, double& min_t, Vec3f& normal) const{
     /*
         Returns true if the sphere is the closest object to the camera.
     */
