@@ -1,5 +1,4 @@
 .git
-sample_scenes/
 *.ppm
 .DS_Store
 .vscode/
