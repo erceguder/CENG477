@@ -14,7 +14,7 @@ class Face{
         Vec3f normal;
 
         void computeNormal();
-        bool intersects(bool bfc, Ray ray, double& min_t, Vec3f& normal);
+        bool intersects(bool bfc, const Ray& ray, double& min_t, Vec3f& normal) const;
 };
 
 #endif

@@ -14,10 +14,7 @@ class Ray
         Vec3f getOrigin() const;
         Vec3f getDirection() const;
 
-        void setOrigin(Vec3f origin);
-        void setDirection(Vec3f direction);
-
-        Vec3f getPoint(double distance);
+        Vec3f getPoint(double distance) const;
 
         friend ostream& operator<<(ostream& os, const Ray& ray);     
 };
