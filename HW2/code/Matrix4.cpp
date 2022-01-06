@@ -54,6 +54,42 @@ void Matrix4::identity() {
             }
         }
     }
+
+}
+
+
+Matrix4 Matrix4::operator*(Matrix4 obj) const {
+    Matrix4 res;
+    double total;
+
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+
+            total = 0;
+            for (int k = 0; k < 4; k++)
+                total += this->val[i][k] * obj.val[k][j];
+
+            res.val[i][j] = total;
+        }
+    }
+
+    return res;
+}
+
+
+Vec4 Matrix4::operator*(Vec4 obj) {
+    double values[4];
+    double total;
+
+    for (int i = 0; i < 4; i++){
+        total = 0;
+        for (int j = 0; j < 4; j++){
+            total += this->val[i][j] * obj.get(j);
+        }
+        values[i] = total;
+    }
+
+    return Vec4(values[0], values[1], values[2], values[3], obj.colorId);
     
 }
 

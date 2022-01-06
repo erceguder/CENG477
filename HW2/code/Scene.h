@@ -26,14 +26,14 @@ public:
 	Color backgroundColor;
 	bool cullingEnabled;
 
-	vector< vector<Color> > image;
-	vector< Camera* > cameras;
-	vector< Vec3* > vertices;
-	vector< Color* > colorsOfVertices;
-	vector< Scaling* > scalings;
-	vector< Rotation* > rotations;
-	vector< Translation* > translations;
-	vector< Mesh* > meshes;
+	vector<vector<Color>> image;
+	vector<Camera*> cameras;
+	vector<Vec3*> vertices;
+	vector<Color*> colorsOfVertices;
+	vector<Scaling*> scalings;
+	vector<Rotation*> rotations;
+	vector<Translation*> translations;
+	vector<Mesh*> meshes;
 
 	Scene(const char *xmlPath);
 

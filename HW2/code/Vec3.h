@@ -30,9 +30,9 @@ public:
     bool operator==(Vec3 obj) const;                     // equality check
 
     double dot(Vec3 obj) const;
-    Vec3 normalize() const;                                // get unit vector
+    Vec3 normalize() const;                               // get unit vector
     Vec3 elementwiseMultiplication(Vec3 obj) const;       //element-wise multiplication
-    double length() const;                                  // get vector's length
+    double length() const;                                // get vector's length
     
     friend std::ostream& operator<<(std::ostream& os, const Vec3& v);
 };
