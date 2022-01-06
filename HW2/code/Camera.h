@@ -1,10 +1,14 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
-#include "Vec3.h"
 #include <string>
+#include <iostream>
+#include <iomanip>
+#include "Vec3.h"
+
 
 using namespace std;
+
 
 class Camera
 {

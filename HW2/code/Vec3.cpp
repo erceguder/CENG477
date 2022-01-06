@@ -1,5 +1,4 @@
 #include "Vec3.h"
-#include <iomanip>
 
 
 using namespace std;

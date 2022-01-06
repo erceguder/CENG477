@@ -2,6 +2,8 @@
 #define __VEC4_H__
 
 #include <iostream>
+#include <iomanip>
+
 using namespace std;
 
 class Vec4

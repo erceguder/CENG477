@@ -1,6 +1,4 @@
 #include "Matrix4.h"
-#include <iostream>
-#include <iomanip>
 
 
 using namespace std;
@@ -90,7 +88,7 @@ Vec4 Matrix4::operator*(Vec4 obj) {
     }
 
     return Vec4(values[0], values[1], values[2], values[3], obj.colorId);
-    
+
 }
 
 

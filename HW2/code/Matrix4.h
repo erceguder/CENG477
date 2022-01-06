@@ -2,6 +2,8 @@
 #define __MATRIX4_H__
 
 #include <iostream>
+#include <iomanip>
+
 #include "Vec4.h"
 
 using namespace std;

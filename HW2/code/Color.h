@@ -2,6 +2,7 @@
 #define __COLOR_H__
 
 #include <iostream>
+#include <iomanip>
 
 class Color
 {

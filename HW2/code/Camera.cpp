@@ -1,7 +1,5 @@
 #include "Camera.h"
-#include <string>
-#include <iostream>
-#include <iomanip>
+
 
 using namespace std;
 
