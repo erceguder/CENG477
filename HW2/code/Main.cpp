@@ -4,13 +4,25 @@
 #include "Scene.h"
 #include "Matrix4.h"
 #include "Helpers.h"
+#include "Vec3.h"
+
 
 using namespace std;
 
+
 Scene *scene;
+
 
 int main(int argc, char *argv[])
 {
+
+    Matrix4 mat;
+    mat.identity();
+
+    cout << mat << endl;
+
+    return 0;
+
     if (argc != 2)
     {
         cout << "Please run the rasterizer as:" << endl

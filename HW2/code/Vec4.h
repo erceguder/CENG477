@@ -15,7 +15,7 @@ public:
     Vec4(double x, double y, double z, double t, int colorId);
     Vec4(const Vec4 &other);
     
-    double getElementAt(int index);
+    double get(int index);
 
     friend std::ostream& operator<<(std::ostream& os, const Vec4& v);
 };

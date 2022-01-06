@@ -195,7 +195,7 @@ Vec4 multiplyMatrixWithVec4(Matrix4 m, Vec4 v)
         total = 0;
         for (int j = 0; j < 4; j++)
         {
-            total += m.val[i][j] * v.getElementAt(j);
+            total += m.val[i][j] * v.get(j);
         }
         values[i] = total;
     }

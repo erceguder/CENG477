@@ -13,6 +13,9 @@ public:
     Matrix4();
     Matrix4(double val[4][4]);
     Matrix4(const Matrix4 &other);
+
+    void identity();
+
     friend ostream &operator<<(ostream &os, const Matrix4 &m);
 };
 
