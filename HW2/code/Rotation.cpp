@@ -51,19 +51,19 @@ Matrix4 Rotation::getMatrix() {
     v.normalize();
     w.normalize();
 
-    double entries_m = {
+    double entries_m[4][4] = {
         {u.x, u.y, u.z, 0},
         {v.x, v.y, v.z, 0},
         {w.x, w.y, w.z, 0},
         {0, 0, 0, 1}
     };
-    double entries_m_inv = {
+    double entries_m_inv[4][4] = {
         {u.x, v.x, w.x, 0},
         {u.y, v.y, w.y, 0}, 
         {u.z, v.z, w.z, 0},
         {0, 0, 0, 1}
     };
-    double entries_Rx = {
+    double entries_Rx[4][4] = {
         {1, 0, 0, 0},
         {0, cos(angle_rad), -sin(angle_rad), 0},
         {0, sin(angle_rad), cos(angle_rad), 0},
