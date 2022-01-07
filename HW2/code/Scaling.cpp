@@ -17,8 +17,7 @@ Scaling::Scaling(int scalingId, double sx, double sy, double sz)
 
 
 Matrix4 Scaling::getMatrix() {
-    Matrix4 matrix;
-    matrix.identity();
+    Matrix4 matrix(1.0);
 
     matrix.val[0][0] = this->sx;
     matrix.val[1][1] = this->sy;

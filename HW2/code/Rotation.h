@@ -11,7 +11,6 @@
 
 #define ABS(a) ((a) > 0 ? (a) : -1 * (a))
 #define MIN(a,b) (((a)<(b))?(a):(b))
-
 #define PI 3.14159265
 
 using namespace std;

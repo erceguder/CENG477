@@ -23,8 +23,7 @@ Translation::Translation(int translationId, double tx, double ty, double tz)
 
 
 Matrix4 Translation::getMatrix() {
-    Matrix4 matrix;
-    matrix.identity();
+    Matrix4 matrix(1.0);
 
     matrix.val[0][3] = this->tx;
     matrix.val[1][3] = this->ty;

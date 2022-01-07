@@ -16,8 +16,7 @@ public:
     Matrix4();
     Matrix4(double val[4][4]);
     Matrix4(const Matrix4 &other);
-
-    void identity();
+    Matrix4(double diagonal);
 
     Matrix4 operator*(Matrix4 obj) const;                    
     Vec4 operator*(Vec4 obj);
