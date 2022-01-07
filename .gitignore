@@ -1,3 +1,5 @@
 .DS_Store
 *.icloud
 rasterizer
+HW2/code/*.ppm
+HW2/code/.vscode/

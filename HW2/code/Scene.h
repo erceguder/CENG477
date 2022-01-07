@@ -26,7 +26,7 @@ public:
 	Color backgroundColor;
 	bool cullingEnabled;
 
-	vector<vector<Color>> image;
+	vector<vector<Color > > image;
 	vector<Camera*> cameras;
 	vector<Vec3*> vertices;
 	vector<Color*> colorsOfVertices;
@@ -42,6 +42,8 @@ public:
 	int makeBetweenZeroAnd255(double value);
 	void writeImageToPPMFile(Camera* camera);
 	void convertPPMToPNG(string ppmFileName, int osType);
+
+    void applyModelingTransformations(Mesh* mesh);
 };
 
 #endif

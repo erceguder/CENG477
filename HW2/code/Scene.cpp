@@ -20,6 +20,54 @@
 using namespace tinyxml2;
 using namespace std;
 
+
+void Scene::applyModelingTransformations(Mesh* mesh){
+
+    if (mesh->vertices.empty()) {
+        for (int i=0; i<mesh->triangle_count; i++)
+            for (int j=0; j<3; j++){
+
+                Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
+                mesh->vertices.push_back(v);
+            
+            }
+    }
+
+    int vertice_count = mesh->vertices.size();
+    for (int i=0; i<vertice_count; i++){
+
+        for (int j=0; j<mesh->transformation_count; j++){
+            
+            if (mesh->transformationTypes[j] == 't'){
+
+                int translation_id = mesh->transformationIds[j];
+                Matrix4 translation_matrix = translations[translation_id-1]->getMatrix();
+
+                mesh->vertices[i] = translation_matrix * mesh->vertices[i];
+
+
+            } else if (mesh->transformationTypes[j] == 'r'){
+
+                int rotation_id = mesh->transformationIds[j];
+                Matrix4 rotation_matrix = rotations[rotation_id-1]->getMatrix();
+
+                mesh->vertices[i] = rotation_matrix * mesh->vertices[i];
+
+
+            } else {
+
+                int scaling_id = mesh->transformationIds[j];
+                Matrix4 scaling_matrix = scalings[scaling_id-1]->getMatrix();
+
+                mesh->vertices[i] = scaling_matrix * mesh->vertices[i];
+
+
+            }
+        }
+    }
+
+}
+
 /*
 	Transformations, clipping, culling, rasterization are done here.
 	You may define helper functions.
@@ -27,6 +75,18 @@ using namespace std;
 void Scene::forwardRenderingPipeline(Camera *camera)
 {
 	// TODO: Implement this function.
+
+    int mesh_count = meshes.size();
+    for (int i=0; i<mesh_count; i++){
+
+        Mesh *mesh = meshes[i];
+        mesh->vertices.clear();             // For every camera, we should reset vertices
+
+        applyModelingTransformations(mesh);
+
+    }
+
+
 }
 
 /*
@@ -229,7 +289,7 @@ Scene::Scene(const char *xmlPath)
 			pTransformation = pTransformation->NextSiblingElement("Transformation");
 		}
 
-		mesh->numberOfTransformations = mesh->transformationIds.size();
+		mesh->transformation_count = mesh->transformationIds.size();
 
 		// read mesh faces
 		char *row;
@@ -249,7 +309,7 @@ Scene::Scene(const char *xmlPath)
 			}
 			row = strtok(NULL, "\n");
 		}
-		mesh->numberOfTriangles = mesh->triangles.size();
+		mesh->triangle_count = mesh->triangles.size();
 		meshes.push_back(mesh);
 
 		pMesh = pMesh->NextSiblingElement("Mesh");

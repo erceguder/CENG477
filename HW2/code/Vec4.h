@@ -4,18 +4,21 @@
 #include <iostream>
 #include <iomanip>
 
+#include "Vec3.h"
+
 using namespace std;
 
 class Vec4
 {
 public:
-    double x, y, z, t;
+    double x, y, z, w;
     int colorId;
 
 
     Vec4();
-    Vec4(double x, double y, double z, double t, int colorId);
+    Vec4(double x, double y, double z, double w, int colorId);
     Vec4(const Vec4 &other);
+    Vec4(Vec3 v, double w);
     
     double get(int index);
 
