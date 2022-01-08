@@ -95,6 +95,18 @@ void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
 }
 
 
+void Scene::applyClipping(Mesh* mesh){
+
+    int vertice_count = mesh->vertices.size();
+    for (int i=0; i<vertice_count; i+=3){
+
+        
+    }
+
+
+}
+
+
 /*
 	Transformations, clipping, culling, rasterization are done here.
 	You may define helper functions.
@@ -112,6 +124,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
         applyProjectionTransformations(mesh, camera);
+        applyClipping(mesh);
 
     }
 

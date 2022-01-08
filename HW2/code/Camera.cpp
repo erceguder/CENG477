@@ -104,8 +104,6 @@ Matrix4 Camera::getPersPrjMatrix(){
         {0, 0, far+near, far*near},
         {0, 0, -1, 0}
     };
-    
-    cout << *this << endl;
 
     Matrix4 m_p2o = Matrix4(val);
     Matrix4 m_orth = this->getOrthoPrjMatrix();
