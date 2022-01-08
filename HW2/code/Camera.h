@@ -42,7 +42,10 @@ public:
     Camera(const Camera &other);
 
     // void correctUpVector();
-    Matrix4 getMatrix();
+    Matrix4 getCamTrsMatrix();
+    Matrix4 getOrthoPrjMatrix();
+    Matrix4 getPersPrjMatrix();
+
 
     friend std::ostream &operator<<(std::ostream &os, const Camera &c);
 };

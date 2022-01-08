@@ -63,7 +63,7 @@ Camera::Camera(const Camera &other)
 // }
 
 
-Matrix4 Camera::getMatrix(){
+Matrix4 Camera::getCamTrsMatrix(){
 
     double m_03 = -(u.x*pos.x + u.y*pos.y + u.z*pos.z);
     double m_13 = -(v.x*pos.x + v.y*pos.y + v.z*pos.z);
@@ -80,6 +80,40 @@ Matrix4 Camera::getMatrix(){
     return Matrix4(val);
 
 }
+
+
+Matrix4 Camera::getOrthoPrjMatrix(){
+
+    double val[4][4] = {
+        {2/(right-left), 0, 0, -(right+left)/(right-left)},
+        {0, 2/(top-bottom), 0, -(top+bottom)/(top-bottom)},
+        {0, 0, -2/(far-near), -(far+near)/(far-near)},
+        {0, 0, 0, 1}
+    };
+
+    return Matrix4(val);
+
+}
+
+
+Matrix4 Camera::getPersPrjMatrix(){
+
+    double val[4][4] = {
+        {near, 0, 0, 0},
+        {0, near, 0, 0},
+        {0, 0, far+near, far*near},
+        {0, 0, -1, 0}
+    };
+    
+    cout << *this << endl;
+
+    Matrix4 m_p2o = Matrix4(val);
+    Matrix4 m_orth = this->getOrthoPrjMatrix();
+
+    return m_orth * m_p2o;
+
+}
+
 
 
 ostream &operator<<(ostream &os, const Camera &c)

@@ -68,24 +68,29 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 
 void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
 
-    if (mesh->vertices.empty()) {           // repeated, handle this
-        for (int i=0; i<mesh->triangle_count; i++)
-            for (int j=0; j<3; j++){
-
-                Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
-                mesh->vertices.push_back(v);
-
-            }
-    }
-
     int vertice_count = mesh->vertices.size();
     for (int i=0; i<vertice_count; i++)
-        mesh->vertices[i] = camera->getMatrix() * mesh->vertices[i];
+        mesh->vertices[i] = camera->getCamTrsMatrix() * mesh->vertices[i];
 
 }
 
 
 void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
+
+    int vertice_count = mesh->vertices.size();
+
+    if (camera->projectionType == 0){       // orthographic
+
+        for (int i=0; i<vertice_count; i++)
+            mesh->vertices[i] = camera->getOrthoPrjMatrix() * mesh->vertices[i];
+
+
+    } else {                                // perspective
+
+        for (int i=0; i<vertice_count; i++)
+            mesh->vertices[i] = camera->getPersPrjMatrix() * mesh->vertices[i];
+
+    }
 
 }
 
@@ -106,6 +111,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
 
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
+        applyProjectionTransformations(mesh, camera);
 
     }
 
