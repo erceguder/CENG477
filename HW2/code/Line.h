@@ -14,6 +14,8 @@ public:
 
     Line();
     Line(Vec4 v0, Vec4 v1);
+
+    bool visible(double d, double dist_to_egde, double &t_e, double &t_l);
     
     friend ostream &operator<<(ostream &os, const Line &m);
 };

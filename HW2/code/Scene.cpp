@@ -84,7 +84,6 @@ void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
         for (int i=0; i<vertice_count; i++)
             mesh->vertices[i] = camera->getOrthoPrjMatrix() * mesh->vertices[i];
 
-
     } else {                                // perspective
 
         for (int i=0; i<vertice_count; i++)
@@ -95,9 +94,59 @@ void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
 }
 
 
+void Scene::applyPerspectiveDivide(Mesh* mesh){
+
+    int vertice_count = mesh->vertices.size();
+    for (int i=0; i<vertice_count; i++)
+        mesh->vertices[i] = mesh->vertices[i] * (1/mesh->vertices[i].w);
+
+}
+
+
 void Scene::applyClipping(Mesh* mesh){
 
-    
+    for (int i=0; i<mesh->lines.size(); i++){
+
+        Line *line = &mesh->lines[i];
+        double x_min, y_min, z_min;
+        double x_max, y_max, z_max;
+
+        x_min = y_min = z_min = -1.0;
+        x_max = y_max = z_max = 1.0;
+
+        double t_e = 0;
+        double t_l = 1;
+        bool visible = false;
+
+        double d_x, d_y, d_z;
+        d_x = line->v1.x - line->v0.x;
+        d_y = line->v1.y - line->v0.y;
+        d_z = line->v1.z - line->v0.z;
+
+        if ( line->visible(d_x, x_min-line->v0.x, t_e, t_l) && line->visible(-d_x, line->v0.x-x_max, t_e, t_l) &&
+             line->visible(d_y, y_min-line->v0.y, t_e, t_l) && line->visible(-d_y, line->v0.y-y_max, t_e, t_l) && 
+             line->visible(d_z, z_min-line->v0.z, t_e, t_l) && line->visible(-d_z, line->v0.z-z_max, t_e, t_l)) {
+
+                // visible = true;     // nerde kullanilcak
+
+                if(t_l < 1){
+                    line->v1.x = line->v0.x + d_x * t_l;
+                    line->v1.y = line->v0.y + d_y * t_l;
+                    line->v1.z = line->v0.z + d_z * t_l;
+                }
+                if (t_e > 0) {
+                    line->v0.x = line->v0.x + d_x * t_e;
+                    line->v0.y = line->v0.y + d_y * t_e;
+                    line->v0.z = line->v0.z + d_z * t_e;
+                }
+
+        } else {
+            
+            mesh->lines.erase(mesh->lines.begin() + i);
+            i--;
+
+        }
+    }
 
 
 }
@@ -124,12 +173,14 @@ void Scene::forwardRenderingPipeline(Camera *camera)
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
         applyProjectionTransformations(mesh, camera);
+        applyPerspectiveDivide(mesh);
 
         mesh->fillLinesVector();
 
+        // apply perspective divide first
         applyClipping(mesh);
         
-        exit(0);
+        // exit(0);
 
     }
 

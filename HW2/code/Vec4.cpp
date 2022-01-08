@@ -66,6 +66,16 @@ double Vec4::get(int index)
 }
 
 
+Vec4 Vec4::operator*(double c) const {
+    Vec4 res;
+    res.x = this->x * c;
+    res.y = this->y * c;
+    res.z = this->z * c;
+    res.w = this->w * c;
+    return res;
+}
+
+
 ostream& operator<<(ostream& os, const Vec4& v) {
     
     os << fixed << setprecision(6) << "[" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << "]";

@@ -47,6 +47,7 @@ public:
     void applyCameraTransformations(Mesh* mesh, Camera* camera);
     void applyProjectionTransformations(Mesh* mesh, Camera* camera);
     void applyClipping(Mesh* mesh);
+    void applyPerspectiveDivide(Mesh* mesh);
 };
 
 #endif
