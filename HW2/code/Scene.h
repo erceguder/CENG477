@@ -44,6 +44,8 @@ public:
 	void convertPPMToPNG(string ppmFileName, int osType);
 
     void applyModelingTransformations(Mesh* mesh);
+    void applyCameraTransformations(Mesh* mesh, Camera* camera);
+    void applyProjectionTransformations(Mesh* mesh, Camera* camera);
 };
 
 #endif

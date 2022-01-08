@@ -3,7 +3,9 @@
 
 using namespace std;
 
+
 Camera::Camera() {}
+
 
 Camera::Camera(int cameraId,
                int projectionType,
@@ -33,6 +35,7 @@ Camera::Camera(int cameraId,
     this->outputFileName = outputFileName;
 }
 
+
 Camera::Camera(const Camera &other)
 {
     this->cameraId = other.cameraId;
@@ -52,6 +55,32 @@ Camera::Camera(const Camera &other)
     this->verRes = other.verRes;
     this->outputFileName = other.outputFileName;
 }
+
+
+// void Camera::correctUpVector(){
+//     this->u = this->gaze * v;
+//     this->v = this->gaze * u;
+// }
+
+
+Matrix4 Camera::getMatrix(){
+
+    double m_03 = -(u.x*pos.x + u.y*pos.y + u.z*pos.z);
+    double m_13 = -(v.x*pos.x + v.y*pos.y + v.z*pos.z);
+    double m_23 = -(w.x*pos.x + w.y*pos.y + w.z*pos.z);
+    double m_33 = 1;
+
+    double val[4][4] = {
+        {u.x, u.y, u.z, m_03},
+        {v.x, v.y, v.z, m_13},
+        {w.x, w.y, w.z, m_23},
+        {0, 0, 0, m_33}
+    };
+
+    return Matrix4(val);
+
+}
+
 
 ostream &operator<<(ostream &os, const Camera &c)
 {

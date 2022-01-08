@@ -3,7 +3,9 @@
 
 using namespace std;
 
+
 Mesh::Mesh() {}
+
 
 Mesh::Mesh(int meshId, int type, int transformation_count,
              vector<int> transformationIds,
@@ -20,6 +22,7 @@ Mesh::Mesh(int meshId, int type, int transformation_count,
     this->transformationTypes = transformationTypes;
     this->triangles = triangles;
 }
+
 
 ostream &operator<<(ostream &os, const Mesh &m)
 {

@@ -45,14 +45,12 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 
                 mesh->vertices[i] = translation_matrix * mesh->vertices[i];
 
-
             } else if (mesh->transformationTypes[j] == 'r'){
 
                 int rotation_id = mesh->transformationIds[j];
                 Matrix4 rotation_matrix = rotations[rotation_id-1]->getMatrix();
 
                 mesh->vertices[i] = rotation_matrix * mesh->vertices[i];
-
 
             } else {
 
@@ -61,12 +59,36 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 
                 mesh->vertices[i] = scaling_matrix * mesh->vertices[i];
 
-
             }
         }
     }
 
 }
+
+
+void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
+
+    if (mesh->vertices.empty()) {           // repeated, handle this
+        for (int i=0; i<mesh->triangle_count; i++)
+            for (int j=0; j<3; j++){
+
+                Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
+                mesh->vertices.push_back(v);
+
+            }
+    }
+
+    int vertice_count = mesh->vertices.size();
+    for (int i=0; i<vertice_count; i++)
+        mesh->vertices[i] = camera->getMatrix() * mesh->vertices[i];
+
+}
+
+
+void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
+
+}
+
 
 /*
 	Transformations, clipping, culling, rasterization are done here.
@@ -83,6 +105,7 @@ void Scene::forwardRenderingPipeline(Camera *camera)
         mesh->vertices.clear();             // For every camera, we should reset vertices
 
         applyModelingTransformations(mesh);
+        applyCameraTransformations(mesh, camera);
 
     }
 

@@ -4,7 +4,9 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+
 #include "Vec3.h"
+#include "Matrix4.h"
 
 
 using namespace std;
@@ -29,7 +31,6 @@ public:
     string outputFileName;
 
     Camera();
-
     Camera(int cameraId,
            int projectionType,
            Vec3 pos, Vec3 gaze,
@@ -38,8 +39,10 @@ public:
            double near, double far,
            int horRes, int verRes,
            string outputFileName);
-
     Camera(const Camera &other);
+
+    // void correctUpVector();
+    Matrix4 getMatrix();
 
     friend std::ostream &operator<<(std::ostream &os, const Camera &c);
 };
