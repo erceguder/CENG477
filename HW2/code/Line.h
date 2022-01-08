@@ -11,10 +11,9 @@ using namespace std;
 class Line{
 public:
     Vec4 v0, v1;
-    double w;           // for perspective divide
 
     Line();
-    Line(Vec4 v0, Vec4 v1, double w);
+    Line(Vec4 v0, Vec4 v1);
     
     friend ostream &operator<<(ostream &os, const Line &m);
 };

@@ -23,15 +23,15 @@ using namespace std;
 
 void Scene::applyModelingTransformations(Mesh* mesh){
 
-    if (mesh->vertices.empty()) {
-        for (int i=0; i<mesh->triangle_count; i++)
-            for (int j=0; j<3; j++){
+    // if (mesh->vertices.empty()) {
+    //     for (int i=0; i<mesh->triangle_count; i++)
+    //         for (int j=0; j<3; j++){
 
-                Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
-                mesh->vertices.push_back(v);
+    //             Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
+    //             mesh->vertices.push_back(v);
             
-            }
-    }
+    //         }
+    // }
 
     int vertice_count = mesh->vertices.size();
     for (int i=0; i<vertice_count; i++){
@@ -97,11 +97,7 @@ void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
 
 void Scene::applyClipping(Mesh* mesh){
 
-    int vertice_count = mesh->vertices.size();
-    for (int i=0; i<vertice_count; i+=3){
-
-        
-    }
+    
 
 
 }
@@ -119,12 +115,21 @@ void Scene::forwardRenderingPipeline(Camera *camera)
     for (int i=0; i<mesh_count; i++){
 
         Mesh *mesh = meshes[i];
-        mesh->vertices.clear();             // For every camera, we should reset vertices
+
+        mesh->emptyVerticesVector();
+        mesh->emptyLinesVector();
+
+        mesh->fillVerticesVector(&this->vertices);
 
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
         applyProjectionTransformations(mesh, camera);
+
+        mesh->fillLinesVector();
+
         applyClipping(mesh);
+        
+        exit(0);
 
     }
 

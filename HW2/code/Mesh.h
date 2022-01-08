@@ -7,7 +7,9 @@
 
 #include "Triangle.h"
 #include "Vec4.h"
+#include "Vec3.h"
 #include "Line.h"
+
 
 using namespace std;
 
@@ -31,6 +33,12 @@ public:
           vector<char> transformationTypes,
           int triangle_count,
           vector<Triangle> triangles);
+
+    void fillLinesVector();
+    void emptyLinesVector();
+
+    void fillVerticesVector(vector<Vec3*> *vertices);
+    void emptyVerticesVector();
 
     friend ostream &operator<<(ostream &os, const Mesh &m);
 };

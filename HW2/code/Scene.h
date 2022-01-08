@@ -46,7 +46,7 @@ public:
     void applyModelingTransformations(Mesh* mesh);
     void applyCameraTransformations(Mesh* mesh, Camera* camera);
     void applyProjectionTransformations(Mesh* mesh, Camera* camera);
-    void Scene::applyClipping(Mesh* mesh);
+    void applyClipping(Mesh* mesh);
 };
 
 #endif
