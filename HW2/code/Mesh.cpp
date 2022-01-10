@@ -22,9 +22,9 @@ Mesh::Mesh(int meshId, int type, int transformation_count,
     this->triangles = triangles;
 }
 
-void Mesh::setTriangles(Scene* scene){
+void Mesh::setTriangles(vector<Vec3*> vertices){
     for (int i=0; i < this->triangle_count; i++)
-        this->triangles[i].setVariables(scene);
+        this->triangles[i].setVariables(vertices);
 }
 
 ostream &operator<<(ostream &os, const Mesh &m)

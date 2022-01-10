@@ -35,14 +35,14 @@ Vec4::Vec4(const Vec4 &other)
 }
 
 
-Vec4::Vec4(Vec3 v, double w, Scene* scene){
+Vec4::Vec4(Vec3 v, double w){
     this->x = v.x;
     this->y = v.y;
     this->z = v.z;
     this->w = w;
     this->colorId = v.colorId;
 
-    this->color = *(scene->colorsOfVertices[this->colorId]);
+    // this->color = *(scene->colorsOfVertices[this->colorId]);
 }
 
 

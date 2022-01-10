@@ -9,7 +9,6 @@
 #include "Vec4.h"
 #include "Vec3.h"
 #include "Line.h"
-#include "Scene.h"
 
 using namespace std;
 
@@ -30,7 +29,7 @@ class Mesh{
             int triangle_count,
             vector<Triangle> triangles);
 
-        void setTriangles(Scene* scene);
+        void setTriangles(vector<Vec3*>);
 
         friend ostream &operator<<(ostream &os, const Mesh &m);
 };

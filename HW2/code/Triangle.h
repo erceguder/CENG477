@@ -3,7 +3,7 @@
 
 #include "Vec4.h"
 #include "Line.h"
-#include "Mesh.h"
+#include <vector>
 
 class Triangle
 {
@@ -16,17 +16,9 @@ public:
     Triangle(int vid1, int vid2, int vid3);
     Triangle(const Triangle &other);
 
-    void setVariables(Scene* scene);
+    void setVariables(vector<Vec3*>);
 
     void clip();
-
-    // int getFirstVertexId();
-    // int getSecondVertexId();
-    // int getThirdVertexId();
-
-    // void setFirstVertexId(int vid);
-    // void setSecondVertexId(int vid);
-    // void setThirdVertexId(int vid);
 };
 
 

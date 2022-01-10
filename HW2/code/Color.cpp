@@ -19,7 +19,7 @@ Color::Color(const Color &other)
     this->b = other.b;
 }
 
-Color Color::operator-(Color& rhs) const{
+Color Color::operator-(Color rhs) const{
     Color res;
 
     res.r = this->r - rhs.r;
@@ -29,7 +29,7 @@ Color Color::operator-(Color& rhs) const{
     return res;
 }
 
-Color Color::operator+(Color& rhs) const{
+Color Color::operator+(Color rhs) const{
     Color res;
 
     res.r = this->r + rhs.r;

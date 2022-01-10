@@ -1,5 +1,7 @@
 #include "Line.h"
 
+Line::Line(){}
+
 Line::Line(Vec4 v0, Vec4 v1) {
     this->v0 = v0;
     this->v1 = v1;
@@ -23,7 +25,7 @@ bool Line::visible(double den, double num, double &t_e, double &t_l){
     return true;
 }
 
-void Line::clip(double x_min=-1, double x_max=1, double y_min=-1, double y_max=1, double z_min=-1, double z_max=1){
+void Line::clip(double x_min, double x_max, double y_min, double y_max, double z_min, double z_max){
     double d_x, d_y, d_z;
     double t_e = 0;
     double t_l = 1;
@@ -33,21 +35,21 @@ void Line::clip(double x_min=-1, double x_max=1, double y_min=-1, double y_max=1
     d_z = v1.z - v0.z;
 
     if (d_x == 0)
-        if ((x_min > this->v0.x) || (this->v0.x > x_max))
+        if ((x_min > this->v0.x) || (this->v0.x > x_max))
             this->rejected = true;
 
     if (d_y == 0)
-        if ((y_min > this->v0.y) || (this->v0.y > y_max))
+        if ((y_min > this->v0.y) || (this->v0.y > y_max))
             this->rejected = true;
 
     if (d_z == 0)
-        if ((z_min > this->v0.z) || (this->v0.z > z_max))
+        if ((z_min > this->v0.z) || (this->v0.z > z_max))
             this->rejected = true;
 
     if (this->rejected)
         return;
 
-    Color diff = v1.color - v0.color;
+    Color d_color = v1.color - v0.color;
 
     if (visible(d_x, x_min - this->v0.x, t_e, t_l) && visible(-d_x, this->v0.x - x_max, t_e, t_l) &&
         visible(d_y, y_min - this->v0.y, t_e, t_l) && visible(-d_y, this->v0.y - y_max, t_e, t_l) && 
@@ -58,12 +60,14 @@ void Line::clip(double x_min=-1, double x_max=1, double y_min=-1, double y_max=1
             v1.y = v0.y + d_y * t_l;
             v1.z = v0.z + d_z * t_l;
 
-            v1.color = v0.color + (diff * t_l);
+            v1.color = v0.color + (d_color * t_l);
         }
         if (t_e > 0){
             v0.x = v0.x + d_x * t_e;
             v0.y = v0.y + d_y * t_e;
             v0.z = v0.z + d_z * t_e;
+
+            v0.color = v0.color + (d_color * t_e);
         }
     }
 }

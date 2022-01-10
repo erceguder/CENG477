@@ -13,8 +13,8 @@ public:
     Color(double r, double g, double b);
     Color(const Color &other);
 
-    Color operator-(Color& rhs) const;
-    Color operator+(Color& rhs) const;
+    Color operator-(Color rhs) const;
+    Color operator+(Color rhs) const;
     Color operator*(double c) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Color& c);

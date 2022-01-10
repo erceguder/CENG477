@@ -18,10 +18,10 @@ Triangle::Triangle(const Triangle &other){
     this->vertexIds[2] = other.vertexIds[2];
 }
 
-void Triangle::setVariables(Scene* scene){
+void Triangle::setVariables(vector<Vec3*> vertices){
 
     for (int i=0; i < 3; i++)
-        this->vertices[i] = Vec4(*(scene->vertices[this->vertexIds[i] - 1]), 1, scene);
+        this->vertices[i] = Vec4(*(vertices[this->vertexIds[i] - 1]), 1);
 
     for (int i=0; i < 3; i++)
         this->lines[i] = Line(this->vertices[i], this->vertices[(i+1) % 3]);
@@ -31,34 +31,3 @@ void Triangle::clip(){
     for (int i=0; i < 3; i++)
         lines[i].clip();
 }
-
-// getters
-// int Triangle::getFirstVertexId(){
-//     return this->vertexIds[0];
-// }
-
-// int Triangle::getSecondVertexId()
-// {
-//     return this->vertexIds[1];
-// }
-
-// int Triangle::getThirdVertexId()
-// {
-//     return this->vertexIds[2];
-// }
-
-// // setters
-// void Triangle::setFirstVertexId(int vid)
-// {
-//     this->vertexIds[0] = vid;
-// }
-
-// void Triangle::setSecondVertexId(int vid)
-// {
-//     this->vertexIds[1] = vid;
-// }
-
-// void Triangle::setThirdVertexId(int vid)
-// {
-//     this->vertexIds[2] = vid;
-// }
