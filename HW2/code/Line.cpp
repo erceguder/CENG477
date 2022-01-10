@@ -34,6 +34,8 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
     d_y = v1.y - v0.y;
     d_z = v1.z - v0.z;
 
+    Color d_color = v1.color - v0.color;
+
     if (d_x == 0)
         if ((x_min > this->v0.x) || (this->v0.x > x_max))
             this->rejected = true;
@@ -48,8 +50,6 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
 
     if (this->rejected)
         return;
-
-    Color d_color = v1.color - v0.color;
 
     if (visible(d_x, x_min - this->v0.x, t_e, t_l) && visible(-d_x, this->v0.x - x_max, t_e, t_l) &&
         visible(d_y, y_min - this->v0.y, t_e, t_l) && visible(-d_y, this->v0.y - y_max, t_e, t_l) && 

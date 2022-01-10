@@ -20,7 +20,6 @@
 using namespace tinyxml2;
 using namespace std;
 
-
 void Scene::applyModelingTransformations(Mesh* mesh){
 	// Single mesh pointer
 
@@ -47,7 +46,6 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 	}
 }
 
-
 void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
 	// Single mesh pointer, single camera pointer
 
@@ -61,7 +59,6 @@ void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
 	}
 
 }
-
 
 void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
 	// Single mesh pointer, single camera pointer
@@ -87,7 +84,6 @@ void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
 
 }
 
-
 void Scene::applyPerspectiveDivide(Mesh* mesh){
 	// Single mesh pointer
 
@@ -99,7 +95,6 @@ void Scene::applyPerspectiveDivide(Mesh* mesh){
 	}
 }
 
-
 void Scene::applyClipping(Mesh* mesh){
 	// Single mesh pointer
 
@@ -107,7 +102,18 @@ void Scene::applyClipping(Mesh* mesh){
 		(mesh->triangles[i]).clip();
 }
 
+void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
+	// Single mesh pointer
 
+	Matrix4 M_vp = camera->getViewportMatrix();
+
+	for (int i=0; i < mesh->triangle_count; i++){
+		Triangle* triangle = &(mesh->triangles[i]);
+
+		for (int j=0; j < 3; j++)
+			triangle->vertices[j] = M_vp * triangle->vertices[j];
+	}
+}
 /*
 	Transformations, clipping, culling, rasterization are done here.
 	You may define helper functions.
@@ -129,6 +135,7 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         // apply perspective divide first
         applyClipping(mesh);
+		applyViewportTransformation(mesh, camera);
         
         // exit(0);
     }

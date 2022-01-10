@@ -78,7 +78,6 @@ Matrix4 Camera::getCamTrsMatrix(){
     };
 
     return Matrix4(val);
-
 }
 
 
@@ -92,7 +91,6 @@ Matrix4 Camera::getOrthoPrjMatrix(){
     };
 
     return Matrix4(val);
-
 }
 
 
@@ -109,10 +107,17 @@ Matrix4 Camera::getPersPrjMatrix(){
     Matrix4 m_orth = this->getOrthoPrjMatrix();
 
     return m_orth * m_p2o;
-
 }
 
-
+Matrix4 Camera::getViewportMatrix(){
+    double val[4][4] = {
+        {horRes/2., 0, 0, (horRes-1)/2.},
+        {0, verRes/2., 0, (verRes-1)/2.},
+        {0, 0, 0.5, 0.5},
+        {0, 0, 0, 1}
+    };
+    return Matrix4(val);
+}
 
 ostream &operator<<(ostream &os, const Camera &c)
 {
