@@ -20,178 +20,131 @@
 using namespace tinyxml2;
 using namespace std;
 
-
 void Scene::applyModelingTransformations(Mesh* mesh){
+	// Single mesh pointer
 
-    // if (mesh->vertices.empty()) {
-    //     for (int i=0; i<mesh->triangle_count; i++)
-    //         for (int j=0; j<3; j++){
+	for (int i=0; i < mesh->transformation_count; i++){
+		char transformatin_type = mesh->transformationTypes[i];
+		int transformation_id = mesh->transformationIds[i];
+		Matrix4 transformation_matrix;
 
-    //             Vec4 v(*(vertices[mesh->triangles[i].vertexIds[j]-1]), 1);
-    //             mesh->vertices.push_back(v);
-            
-    //         }
-    // }
+		if (transformatin_type == 't')
+			transformation_matrix = translations[transformation_id-1]->getMatrix();
 
-    int vertice_count = mesh->vertices.size();
-    for (int i=0; i<vertice_count; i++){
+		else if (transformatin_type == 'r')
+			transformation_matrix = rotations[transformation_id-1]->getMatrix();
 
-        for (int j=0; j<mesh->transformation_count; j++){
-            
-            if (mesh->transformationTypes[j] == 't'){
+		else
+			transformation_matrix = scalings[transformation_id-1]->getMatrix();
 
-                int translation_id = mesh->transformationIds[j];
-                Matrix4 translation_matrix = translations[translation_id-1]->getMatrix();
+		for (int j=0; j < mesh->triangle_count; j++){
+			Triangle* triangle = &(mesh->triangles[j]);
 
-                mesh->vertices[i] = translation_matrix * mesh->vertices[i];
-
-            } else if (mesh->transformationTypes[j] == 'r'){
-
-                int rotation_id = mesh->transformationIds[j];
-                Matrix4 rotation_matrix = rotations[rotation_id-1]->getMatrix();
-
-                mesh->vertices[i] = rotation_matrix * mesh->vertices[i];
-
-            } else {
-
-                int scaling_id = mesh->transformationIds[j];
-                Matrix4 scaling_matrix = scalings[scaling_id-1]->getMatrix();
-
-                mesh->vertices[i] = scaling_matrix * mesh->vertices[i];
-
-            }
-        }
-    }
-
+			for (int k=0; k < 3; k++)
+				triangle->vertices[k] = transformation_matrix * triangle->vertices[k];
+		}
+	}
 }
-
 
 void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
+	// Single mesh pointer, single camera pointer
 
-    int vertice_count = mesh->vertices.size();
-    for (int i=0; i<vertice_count; i++)
-        mesh->vertices[i] = camera->getCamTrsMatrix() * mesh->vertices[i];
+	Matrix4 M_cam = camera->getCamTrsMatrix();
+
+	for (int i=0; i < mesh->triangle_count; i++){
+		Triangle* triangle = &(mesh->triangles[i]);
+		
+		for (int j=0; j < 3; j++)
+			triangle->vertices[j] = M_cam * triangle->vertices[j];
+	}
 
 }
-
 
 void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
+	// Single mesh pointer, single camera pointer
 
-    int vertice_count = mesh->vertices.size();
+	Matrix4 M_ort = camera->getOrthoPrjMatrix();
+	Matrix4 M_per = camera->getPersPrjMatrix();
 
-    if (camera->projectionType == 0){       // orthographic
+	if (camera->projectionType == 0)	// orthographic
+		for (int i=0; i < mesh->triangle_count; i++){
+			Triangle* triangle = &(mesh->triangles[i]);
 
-        for (int i=0; i<vertice_count; i++)
-            mesh->vertices[i] = camera->getOrthoPrjMatrix() * mesh->vertices[i];
+			for (int j=0; j < 3; j++)
+				triangle->vertices[j] = M_ort * triangle->vertices[j];
+		}
 
-    } else {                                // perspective
+	else	// perspective
+		for (int i=0; i < mesh->triangle_count; i++){
+			Triangle* triangle = &(mesh->triangles[i]);
 
-        for (int i=0; i<vertice_count; i++)
-            mesh->vertices[i] = camera->getPersPrjMatrix() * mesh->vertices[i];
-
-    }
+			for (int j=0; j < 3; j++)
+				triangle->vertices[j] = M_per * triangle->vertices[j];
+		}
 
 }
-
 
 void Scene::applyPerspectiveDivide(Mesh* mesh){
+	// Single mesh pointer
 
-    int vertice_count = mesh->vertices.size();
-    for (int i=0; i<vertice_count; i++)
-        mesh->vertices[i] = mesh->vertices[i] * (1/mesh->vertices[i].w);
+	for (int i=0; i < mesh->triangle_count; i++){
+		Triangle* triangle = &(mesh->triangles[i]);
 
+		for (int j=0; j < 3; j++)
+			triangle->vertices[j] = triangle->vertices[j] * (1 / (triangle->vertices[j]).w);
+	}
 }
-
 
 void Scene::applyClipping(Mesh* mesh){
+	// Single mesh pointer
 
-    for (int i=0; i<mesh->lines.size(); i++){
-
-        Line *line = &mesh->lines[i];
-        double x_min, y_min, z_min;
-        double x_max, y_max, z_max;
-
-        x_min = y_min = z_min = -1.0;
-        x_max = y_max = z_max = 1.0;
-
-        double t_e = 0;
-        double t_l = 1;
-        bool visible = false;
-
-        double d_x, d_y, d_z;
-        d_x = line->v1.x - line->v0.x;
-        d_y = line->v1.y - line->v0.y;
-        d_z = line->v1.z - line->v0.z;
-
-        if ( line->visible(d_x, x_min-line->v0.x, t_e, t_l) && line->visible(-d_x, line->v0.x-x_max, t_e, t_l) &&
-             line->visible(d_y, y_min-line->v0.y, t_e, t_l) && line->visible(-d_y, line->v0.y-y_max, t_e, t_l) && 
-             line->visible(d_z, z_min-line->v0.z, t_e, t_l) && line->visible(-d_z, line->v0.z-z_max, t_e, t_l)) {
-
-                // visible = true;     // nerde kullanilcak
-
-                if(t_l < 1){
-                    line->v1.x = line->v0.x + d_x * t_l;
-                    line->v1.y = line->v0.y + d_y * t_l;
-                    line->v1.z = line->v0.z + d_z * t_l;
-                }
-                if (t_e > 0) {
-                    line->v0.x = line->v0.x + d_x * t_e;
-                    line->v0.y = line->v0.y + d_y * t_e;
-                    line->v0.z = line->v0.z + d_z * t_e;
-                }
-
-        } else {
-            
-            mesh->lines.erase(mesh->lines.begin() + i);
-            i--;
-
-        }
-    }
-
-
+	for (int i=0; i < mesh->triangle_count; i++)
+		(mesh->triangles[i]).clip();
 }
 
+void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
+	// Single mesh pointer
 
+	Matrix4 M_vp = camera->getViewportMatrix();
+
+	for (int i=0; i < mesh->triangle_count; i++){
+		Triangle* triangle = &(mesh->triangles[i]);
+
+		for (int j=0; j < 3; j++)
+			triangle->vertices[j] = M_vp * triangle->vertices[j];
+	}
+}
 /*
 	Transformations, clipping, culling, rasterization are done here.
 	You may define helper functions.
 */
-void Scene::forwardRenderingPipeline(Camera *camera)
-{
-	// TODO: Implement this function.
+void Scene::forwardRenderingPipeline(Camera *camera){
+	// Single camera pointer
 
     int mesh_count = meshes.size();
     for (int i=0; i<mesh_count; i++){
 
         Mesh *mesh = meshes[i];
 
-        mesh->emptyVerticesVector();
-        mesh->emptyLinesVector();
-
-        mesh->fillVerticesVector(&this->vertices);
-
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
         applyProjectionTransformations(mesh, camera);
         applyPerspectiveDivide(mesh);
 
-        mesh->fillLinesVector();
+		mesh->setTriangles(this->vertices);
 
         // apply perspective divide first
         applyClipping(mesh);
+		applyViewportTransformation(mesh, camera);
         
         // exit(0);
-
     }
-
-
 }
 
 /*
 	Parses XML file
 */
-Scene::Scene(const char *xmlPath)
-{
+Scene::Scene(const char *xmlPath){
 	const char *str;
 	XMLDocument xmlDoc;
 	XMLElement *pElement;
@@ -417,8 +370,7 @@ Scene::Scene(const char *xmlPath)
 /*
 	Initializes image with background color
 */
-void Scene::initializeImage(Camera *camera)
-{
+void Scene::initializeImage(Camera *camera){
 	if (this->image.empty())
 	{
 		for (int i = 0; i < camera->horRes; i++)

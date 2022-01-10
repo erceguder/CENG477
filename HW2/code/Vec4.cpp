@@ -41,6 +41,8 @@ Vec4::Vec4(Vec3 v, double w){
     this->z = v.z;
     this->w = w;
     this->colorId = v.colorId;
+
+    // this->color = *(scene->colorsOfVertices[this->colorId]);
 }
 
 
@@ -48,20 +50,20 @@ double Vec4::get(int index)
 {
     switch (index)
     {
-    case 0:
-        return this->x;
+        case 0:
+            return this->x;
 
-    case 1:
-        return this->y;
+        case 1:
+            return this->y;
 
-    case 2:
-        return this->z;
+        case 2:
+            return this->z;
 
-    case 3:
-        return this->w;
+        case 3:
+            return this->w;
 
-    default:
-        return this->w;
+        default:
+            return this->w;
     }
 }
 
@@ -71,7 +73,10 @@ Vec4 Vec4::operator*(double c) const {
     res.x = this->x * c;
     res.y = this->y * c;
     res.z = this->z * c;
+    
+    // ???????
     res.w = this->w * c;
+
     return res;
 }
 

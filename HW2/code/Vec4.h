@@ -5,6 +5,7 @@
 #include <iomanip>
 
 #include "Vec3.h"
+#include "Color.h"
 
 using namespace std;
 
@@ -13,7 +14,7 @@ class Vec4
 public:
     double x, y, z, w;
     int colorId;
-
+    Color color;
 
     Vec4();
     Vec4(double x, double y, double z, double w, int colorId);
