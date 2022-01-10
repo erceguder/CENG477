@@ -11,8 +11,7 @@ Mesh::Mesh(int meshId, int type, int transformation_count,
              vector<int> transformationIds,
              vector<char> transformationTypes,
              int numberOfTriangles,
-             vector<Triangle> triangles)
-{
+             vector<Triangle> triangles){
     this->meshId = meshId;
     this->type = type;
     this->transformation_count = transformation_count;
@@ -23,49 +22,10 @@ Mesh::Mesh(int meshId, int type, int transformation_count,
     this->triangles = triangles;
 }
 
-
-void Mesh::fillLinesVector(){
-
-    int vertice_count = this->vertices.size();
-    for (int i=0; i<vertice_count; i+=3){
-
-        // ccw order
-        Line l1(this->vertices[i], this->vertices[i+1]);
-        Line l2(this->vertices[i+1], this->vertices[i+2]);
-        Line l3(this->vertices[i+2], this->vertices[i]);
-
-        this->lines.push_back(l1);
-        this->lines.push_back(l2);
-        this->lines.push_back(l3);
-
-    }
-
+void Mesh::setTriangles(Scene* scene){
+    for (int i=0; i < this->triangle_count; i++)
+        this->triangles[i].setVariables(scene);
 }
-
-
-void Mesh::emptyLinesVector(){
-    this->lines.clear();
-}
-
-
-void Mesh::fillVerticesVector(vector<Vec3*> *vertices){
-
-    if (this->vertices.empty())
-        for (int i=0; i<this->triangle_count; i++)
-            for (int j=0; j<3; j++){
-
-                Vec4 v(*((*vertices)[this->triangles[i].vertexIds[j]-1]), 1);
-                this->vertices.push_back(v);
-            
-            }
-
-}
-
-
-void Mesh::emptyVerticesVector(){
-    this->vertices.clear();
-}
-
 
 ostream &operator<<(ostream &os, const Mesh &m)
 {
