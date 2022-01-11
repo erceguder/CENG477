@@ -91,7 +91,7 @@ void Scene::applyPerspectiveDivide(Mesh* mesh){
 		Triangle* triangle = &(mesh->triangles[i]);
 
 		for (int j=0; j < 3; j++)
-			triangle->vertices[j] = triangle->vertices[j] * (1 / (triangle->vertices[j]).w);
+			triangle->vertices[j].perspectiveDivide();
 	}
 }
 
@@ -102,6 +102,15 @@ void Scene::applyClipping(Mesh* mesh){
 		(mesh->triangles[i]).clip();
 }
 
+void Scene::applyCulling(Mesh* mesh, Camera* camera){
+	// Single mesh pointer
+
+	Vec4 cam_pos = Vec4(camera->pos, 1);
+
+	for (int i=0; i < mesh->triangle_count; i++)
+		mesh->triangles[i].applyCulling(cam_pos);
+}
+
 void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
 	// Single mesh pointer
 
@@ -110,14 +119,21 @@ void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
 	for (int i=0; i < mesh->triangle_count; i++){
 		Triangle* triangle = &(mesh->triangles[i]);
 
-		for (int j=0; j < 3; j++)
-			triangle->vertices[j] = M_vp * triangle->vertices[j];
+		if (triangle->culled)
+			continue;
+
+		for (int j=0; j < 3; j++){
+			Line* line = &(triangle->lines[j]);
+
+			if (line->rejected)
+				continue;
+
+			line->v0 = M_vp * line->v0;
+			line->v1 = M_vp * line->v1;
+		}
 	}
 }
-/*
-	Transformations, clipping, culling, rasterization are done here.
-	You may define helper functions.
-*/
+
 void Scene::forwardRenderingPipeline(Camera *camera){
 	// Single camera pointer
 
@@ -126,6 +142,8 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         Mesh *mesh = meshes[i];
 
+		cout << "mesh no: " << i << endl;
+
 		mesh->setVertices(this->vertices);
 
         applyModelingTransformations(mesh);
@@ -133,10 +151,12 @@ void Scene::forwardRenderingPipeline(Camera *camera){
         applyProjectionTransformations(mesh, camera);
         applyPerspectiveDivide(mesh);
 
-		mesh->setLines();
+		mesh->setLines();	// Set lines after transformations
 
         // apply perspective divide first
         applyClipping(mesh);
+		applyCulling(mesh, camera);
+
 		applyViewportTransformation(mesh, camera);
         
         // exit(0);

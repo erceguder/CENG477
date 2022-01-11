@@ -21,8 +21,13 @@ public:
     Vec4(const Vec4 &other);
     Vec4(Vec3 v, double w);
 
-    Vec4 operator*(double c) const;                  // scalar multiplication
-    
+    void perspectiveDivide();
+
+    Vec4 operator*(Vec4 rhs) const;    // Vector product
+    Vec4 operator*(double c) const;     // scalar vertex multiplication
+    Vec4 operator-(Vec4 rhs) const;    // vertex subtraction
+
+    double dot(Vec4& rhs);              // dot product of vectors
     double get(int index);
 
     friend std::ostream& operator<<(std::ostream& os, const Vec4& v);

@@ -14,12 +14,12 @@ bool Line::visible(double den, double num, double &t_e, double &t_l){
     if (den > 0) {        // pot. entering
         if (t > t_l) return false;
         if (t > t_e) t_e = t;
-
-    } else if (den < 0) {     // pot. leaving
+    }
+    else if (den < 0) {     // pot. leaving
         if (t < t_e) return false;
         if (t < t_l) t_l = t;
-
-    } else if (num > 0) 
+    }
+    else if (num > 0) 
         return false;
 
     return true;
