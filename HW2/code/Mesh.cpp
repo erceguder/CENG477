@@ -27,6 +27,11 @@ void Mesh::setVertices(vector<Vec3*>& vertices){
         this->triangles[i].setVertices(vertices);
 }
 
+void Mesh::setColours(vector<Color*>& colours){
+    for (int i=0; i < this->triangle_count; i++)
+        this->triangles[i].setColours(colours);
+}
+
 void Mesh::setLines(){
     for (int i=0; i < this->triangle_count; i++)
         this->triangles[i].setLines();

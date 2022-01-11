@@ -25,6 +25,11 @@ void Triangle::setVertices(vector<Vec3*>& vertices){
         this->vertices[i] = Vec4(*(vertices[this->vertexIds[i] - 1]), 1);
 }
 
+void Triangle::setColours(vector<Color*>& colours){
+    for (int i=0; i < 3; i++)
+        this->vertices[i].color = *(colours[this->vertices[i].colorId - 1]);
+}
+
 void Triangle::setLines(){
     for (int i=0; i < 3; i++)
         this->lines[i] = Line(this->vertices[i], this->vertices[(i+1) % 3]);
@@ -36,10 +41,23 @@ void Triangle::clip(){
 }
 
 void Triangle::applyCulling(Vec4 cam_pos){
-    Vec4 eye_vector = this->vertices[0] - cam_pos;
-    
-    Vec4 normal = (this->vertices[1] - this->vertices[0]) * (this->vertices[2] - this->vertices[1]);
+    Vec4 eye_vector = this->vertices[0];
 
-    if (normal.dot(eye_vector) > 0)
+    Vec4 normal = (this->vertices[1] - this->vertices[0]) * (this->vertices[2] - this->vertices[0]);
+
+    if (normal.dot(eye_vector) >= 0)
         this->culled = true;
+}
+
+void Triangle::draw(vector<vector<Color > >& image, bool solid, int n_x, int n_y){
+    if (this->culled)
+        return;
+
+    if (solid){
+        // Triangle rasterization
+    }
+    else{
+        for (int i=0; i < 3; i++)
+            this->lines[i].draw(image, n_x, n_y);
+    }
 }

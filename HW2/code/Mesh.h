@@ -30,6 +30,7 @@ class Mesh{
             vector<Triangle> triangles);
 
         void setVertices(vector<Vec3*>& vertices);
+        void setColours(vector<Color*>& colours);
         void setLines();
 
         friend ostream &operator<<(ostream &os, const Mesh &m);
