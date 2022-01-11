@@ -23,6 +23,8 @@ Triangle::Triangle(const Triangle &other){
 void Triangle::setVertices(vector<Vec3*>& vertices){
     for (int i=0; i < 3; i++)
         this->vertices[i] = Vec4(*(vertices[this->vertexIds[i] - 1]), 1);
+
+    this->culled = false;
 }
 
 void Triangle::setColours(vector<Color*>& colours){
