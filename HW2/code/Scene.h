@@ -50,6 +50,8 @@ public:
 	void applyCulling(Mesh* mesh, Camera* camera);
     void applyPerspectiveDivide(Mesh* mesh);
 	void applyViewportTransformation(Mesh* mesh, Camera* camera);
+
+	void writeImage(Mesh* mesh, Camera* cam);
 };
 
 #endif

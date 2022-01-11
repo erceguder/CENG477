@@ -19,6 +19,8 @@ Rotation::Rotation(int rotationId, double angle, double x, double y, double z)
 
 Matrix4 Rotation::getMatrix() {
     Vec3 u(this->ux, this->uy, this->uz, -1);
+    u.normalize();
+
     Vec3 v;
     double abs_ux, abs_uy, abs_uz;
     double angle_rad = this->angle * PI/180;
@@ -33,22 +35,22 @@ Matrix4 Rotation::getMatrix() {
         v.x = 0;
         v.y = -1 * u.z;
         v.z = u.y;
-
-    } else if (min == abs_uy) {
+    }
+    else if (min == abs_uy) {
         v.x = -1 * u.z;
         v.y = 0;
         v.z = u.x;
-
-    } else {
+    }
+    else {
         v.x = -1 * u.y;
         v.y = u.x;
         v.z = 0;
-
     }
 
-    Vec3 w = u * v;
-
     v.normalize();
+
+    Vec3 w = u * v;
+    
     w.normalize();
 
     double entries_m[4][4] = {
