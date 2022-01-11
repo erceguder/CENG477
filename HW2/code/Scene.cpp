@@ -171,9 +171,6 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         Mesh *mesh = meshes[i];
 
-		for (int j=0; j < mesh->triangle_count; j++)
-			mesh->triangles[j].culled = false;
-
 		mesh->setVertices(this->vertices);
 
         applyModelingTransformations(mesh);
