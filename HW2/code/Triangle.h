@@ -13,9 +13,10 @@ public:
     Line lines[3];
 
     Triangle();
-    Triangle(int vid1, int vid2, int vid3, vector<Vec3*>);
+    Triangle(int vid1, int vid2, int vid3);
     Triangle(const Triangle &other);
 
+    void setVertices(vector<Vec3*>& vertices);
     void setLines();
 
     void clip();
