@@ -29,7 +29,7 @@ class Mesh{
             int triangle_count,
             vector<Triangle> triangles);
 
-        void setTriangles(vector<Vec3*>);
+        void setLines();
 
         friend ostream &operator<<(ostream &os, const Mesh &m);
 };
