@@ -26,6 +26,7 @@ public:
     Vec4 operator*(Vec4 rhs) const;    // Vector product
     Vec4 operator*(double c) const;     // scalar vertex multiplication
     Vec4 operator-(Vec4 rhs) const;    // vertex subtraction
+    bool operator==(Vec4 obj) const;           // equality check
 
     double dot(Vec4& rhs);              // dot product of vectors
     double get(int index);

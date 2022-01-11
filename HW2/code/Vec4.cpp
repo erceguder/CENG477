@@ -100,6 +100,15 @@ Vec4 Vec4::operator-(Vec4 rhs) const{
     return res;
 }
 
+bool Vec4::operator==(Vec4 obj) const{
+
+    if ((ABS((this->x - obj.x)) < EPSILON) && (ABS((this->y - obj.y)) < EPSILON) && (ABS((this->z - obj.z)) < EPSILON))
+        return true;
+    else
+        return false;
+
+} 
+
 double Vec4::dot(Vec4& rhs){
     double res = 0;
 

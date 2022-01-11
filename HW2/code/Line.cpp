@@ -72,6 +72,18 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
     }
 }
 
+double Line::f(Vec4 p){
+    Vec4 n(0, this->v0.z-this->v1.z, this->v1.y-this->v0.y, 0, -1);
+    return (p-this->v0).dot(n);
+}
+
+double Line::slope(){
+
+    if (this->v1.x == this->v0.x) return DBL_MAX;
+
+    return (this->v1.y - this->v0.y) / (this->v1.x - this->v0.x);
+}
+
 ostream& operator<<(ostream& os, const Line& line) {
     
     os << fixed << setprecision(6) << "Endpoint 1: " << line.v0 << ", Endpoint 2: " << line.v1 << endl;;

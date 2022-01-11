@@ -2,6 +2,7 @@
 #define __LINE_H__
 
 #include <iostream>
+#include <float.h>
 
 #include "Vec4.h"
 
@@ -17,6 +18,8 @@ public:
 
     bool visible(double den, double num, double &t_e, double &t_l);
     void clip(double x_min=-1, double x_max=1, double y_min=-1, double y_max=1, double z_min=-1, double z_max=1);
+    double f(Vec4 v);
+    double slope();     //infinity???
 
     friend ostream &operator<<(ostream &os, const Line &m);
 };
