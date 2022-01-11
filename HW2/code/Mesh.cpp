@@ -22,6 +22,11 @@ Mesh::Mesh(int meshId, int type, int transformation_count,
     this->triangles = triangles;
 }
 
+void Mesh::setVertices(vector<Vec3*>& vertices){
+    for (int i=0; i < this->triangle_count; i++)
+        this->triangles[i].setVertices(vertices);
+}
+
 void Mesh::setLines(){
     for (int i=0; i < this->triangle_count; i++)
         this->triangles[i].setLines();

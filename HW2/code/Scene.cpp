@@ -126,12 +126,14 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         Mesh *mesh = meshes[i];
 
+		mesh->setVertices(this->vertices);
+
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
         applyProjectionTransformations(mesh, camera);
         applyPerspectiveDivide(mesh);
 
-		mesh->setTriangles(this->vertices);
+		mesh->setLines();
 
         // apply perspective divide first
         applyClipping(mesh);
