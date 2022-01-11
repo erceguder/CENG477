@@ -28,20 +28,41 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 		int transformation_id = mesh->transformationIds[i];
 		Matrix4 transformation_matrix;
 
-		if (transformatin_type == 't')
+		if (transformatin_type == 't'){
+			// cout << "[translate] t_x: " << translations[transformation_id-1]->tx;
+			// cout << " t_y: " << translations[transformation_id-1]->ty;
+			// cout << " t_z: " << translations[transformation_id-1]->tz << endl;
+			
 			transformation_matrix = translations[transformation_id-1]->getMatrix();
+		}
 
-		else if (transformatin_type == 'r')
+		else if (transformatin_type == 'r'){
+			// cout << "[rotate] alpha: " << rotations[transformation_id-1]->angle;
+			// cout << " u_x: " << rotations[transformation_id-1]->ux;
+			// cout << " u_y: " << rotations[transformation_id-1]->uy;
+			// cout << " u_z: " << rotations[transformation_id-1]->uz << endl;
+
 			transformation_matrix = rotations[transformation_id-1]->getMatrix();
+		}
 
-		else
+		else{
+			// cout << "[scale] s_x: " << scalings[transformation_id-1]->sx;
+			// cout << " s_y: " << scalings[transformation_id-1]->sy;
+			// cout << " s_z: " << scalings[transformation_id-1]->sz << endl;
+
 			transformation_matrix = scalings[transformation_id-1]->getMatrix();
+		}
 
 		for (int j=0; j < mesh->triangle_count; j++){
 			Triangle* triangle = &(mesh->triangles[j]);
 
-			for (int k=0; k < 3; k++)
+			for (int k=0; k < 3; k++){
+				// cout << "\tbefore: " << triangle->vertices[k] << endl;
+
 				triangle->vertices[k] = transformation_matrix * triangle->vertices[k];
+
+				// cout << "\tafter: " << triangle->vertices[k] << endl;
+			}
 		}
 	}
 }
@@ -134,6 +155,26 @@ void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
 	}
 }
 
+void Scene::writeImage(Mesh* mesh, Camera* camera){
+
+	for (int i=0; i < mesh->triangle_count; i++){
+		Triangle* triangle = &(mesh->triangles[i]);
+
+		if (triangle->culled)
+			continue;
+
+		for (int j=0; j < 3; j++){
+			Line* line = &(triangle->lines[j]);
+
+			if (line->rejected)
+				continue;
+
+			this->image[floor(line->v0.y + .5)][floor(line->v0.x + .5)] = line->v0.color;
+			this->image[floor(line->v1.y + .5)][floor(line->v1.x + .5)] = line->v0.color;
+		}
+	}
+}
+
 void Scene::forwardRenderingPipeline(Camera *camera){
 	// Single camera pointer
 
@@ -141,8 +182,6 @@ void Scene::forwardRenderingPipeline(Camera *camera){
     for (int i=0; i<mesh_count; i++){
 
         Mesh *mesh = meshes[i];
-
-		cout << "mesh no: " << i << endl;
 
 		mesh->setVertices(this->vertices);
 
@@ -158,8 +197,8 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 		applyCulling(mesh, camera);
 
 		applyViewportTransformation(mesh, camera);
-        
-        // exit(0);
+
+		writeImage(mesh, camera);
     }
 }
 

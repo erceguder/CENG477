@@ -36,20 +36,37 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
 
     Color d_color = v1.color - v0.color;
 
-    if (d_x == 0)
-        if ((x_min > this->v0.x) || (this->v0.x > x_max))
-            this->rejected = true;
+    // if (ABS(d_x) < EPSILON)
+    //     if ((x_min > this->v0.x) || (this->v0.x > x_max))
+    //         this->rejected = true;
 
-    if (d_y == 0)
-        if ((y_min > this->v0.y) || (this->v0.y > y_max))
-            this->rejected = true;
+    // if (ABS(d_y) < EPSILON)
+    //     if ((y_min > this->v0.y) || (this->v0.y > y_max))
+    //         this->rejected = true;
 
-    if (d_z == 0)
-        if ((z_min > this->v0.z) || (this->v0.z > z_max))
-            this->rejected = true;
+    // if (ABS(d_z) < EPSILON)
+    //     if ((z_min > this->v0.z) || (this->v0.z > z_max))
+    //         this->rejected = true;
 
-    if (this->rejected)
-        return;
+    // if ((x_min > this->v0.x) && (x_min > this->v1.x))
+    //     this->rejected = true;
+    // else if ((x_max < this->v0.x) && (x_max < this->v1.x))
+    //     this->rejected = true;
+
+    // else if ((y_min > this->v0.y) && (y_min > this->v1.y))
+    //     this->rejected = true;
+    // else if ((y_max < this->v0.y) && (y_max < this->v1.y))
+    //     this->rejected = true;
+
+    // else if ((z_min > this->v0.z) && (z_min > this->v1.z))
+    //     this->rejected = true;
+    // else if ((z_max < this->v0.z) && (y_max < this->v1.z))
+    //     this->rejected = true;
+
+    // if (this->rejected){
+    //     cout << "rejected\n";
+    //     return;
+    // }
 
     if (visible(d_x, x_min - this->v0.x, t_e, t_l) && visible(-d_x, this->v0.x - x_max, t_e, t_l) &&
         visible(d_y, y_min - this->v0.y, t_e, t_l) && visible(-d_y, this->v0.y - y_max, t_e, t_l) && 
@@ -70,6 +87,8 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
             v0.color = v0.color + (d_color * t_e);
         }
     }
+    else
+        this->rejected = true;
 }
 
 ostream& operator<<(ostream& os, const Line& line) {
