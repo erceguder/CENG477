@@ -85,9 +85,10 @@ Vec4 Matrix4::operator*(Vec4 obj) {
         }
         values[i] = total;
     }
+    Vec4 res = Vec4(values[0], values[1], values[2], values[3], obj.colorId);
+    res.color = obj.color;
 
-    return Vec4(values[0], values[1], values[2], values[3], obj.colorId);
-
+    return res;
 }
 
 

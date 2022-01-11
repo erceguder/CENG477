@@ -74,11 +74,10 @@ void Scene::applyCameraTransformations(Mesh* mesh, Camera* camera){
 
 	for (int i=0; i < mesh->triangle_count; i++){
 		Triangle* triangle = &(mesh->triangles[i]);
-		
+
 		for (int j=0; j < 3; j++)
 			triangle->vertices[j] = M_cam * triangle->vertices[j];
 	}
-
 }
 
 void Scene::applyProjectionTransformations(Mesh* mesh, Camera* camera){
@@ -125,6 +124,8 @@ void Scene::applyClipping(Mesh* mesh){
 
 void Scene::applyCulling(Mesh* mesh, Camera* camera){
 	// Single mesh pointer
+	if (!cullingEnabled)
+		return;
 
 	Vec4 cam_pos = Vec4(camera->pos, 1);
 
@@ -158,20 +159,7 @@ void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
 void Scene::writeImage(Mesh* mesh, Camera* camera){
 
 	for (int i=0; i < mesh->triangle_count; i++){
-		Triangle* triangle = &(mesh->triangles[i]);
-
-		if (triangle->culled)
-			continue;
-
-		for (int j=0; j < 3; j++){
-			Line* line = &(triangle->lines[j]);
-
-			if (line->rejected)
-				continue;
-
-			this->image[floor(line->v0.y + .5)][floor(line->v0.x + .5)] = line->v0.color;
-			this->image[floor(line->v1.y + .5)][floor(line->v1.x + .5)] = line->v0.color;
-		}
+		mesh->triangles[i].draw(this->image, mesh->type, camera->horRes, camera->verRes);
 	}
 }
 
@@ -183,18 +171,23 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         Mesh *mesh = meshes[i];
 
+		for (int j=0; j < mesh->triangle_count; j++)
+			mesh->triangles[j].culled = false;
+
 		mesh->setVertices(this->vertices);
 
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
+		applyCulling(mesh, camera);
         applyProjectionTransformations(mesh, camera);
         applyPerspectiveDivide(mesh);
 
+		mesh->setColours(this->colorsOfVertices);
 		mesh->setLines();	// Set lines after transformations
 
         // apply perspective divide first
         applyClipping(mesh);
-		applyCulling(mesh, camera);
+		// applyCulling(mesh, camera);
 
 		applyViewportTransformation(mesh, camera);
 

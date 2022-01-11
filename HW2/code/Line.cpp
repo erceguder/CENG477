@@ -3,8 +3,8 @@
 Line::Line(){}
 
 Line::Line(Vec4 v0, Vec4 v1) {
-    this->v0 = v0;
-    this->v1 = v1;
+    this->v0 = Vec4(v0);
+    this->v1 = Vec4(v1);
     this->rejected = false;
 }
 
@@ -36,38 +36,6 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
 
     Color d_color = v1.color - v0.color;
 
-    // if (ABS(d_x) < EPSILON)
-    //     if ((x_min > this->v0.x) || (this->v0.x > x_max))
-    //         this->rejected = true;
-
-    // if (ABS(d_y) < EPSILON)
-    //     if ((y_min > this->v0.y) || (this->v0.y > y_max))
-    //         this->rejected = true;
-
-    // if (ABS(d_z) < EPSILON)
-    //     if ((z_min > this->v0.z) || (this->v0.z > z_max))
-    //         this->rejected = true;
-
-    // if ((x_min > this->v0.x) && (x_min > this->v1.x))
-    //     this->rejected = true;
-    // else if ((x_max < this->v0.x) && (x_max < this->v1.x))
-    //     this->rejected = true;
-
-    // else if ((y_min > this->v0.y) && (y_min > this->v1.y))
-    //     this->rejected = true;
-    // else if ((y_max < this->v0.y) && (y_max < this->v1.y))
-    //     this->rejected = true;
-
-    // else if ((z_min > this->v0.z) && (z_min > this->v1.z))
-    //     this->rejected = true;
-    // else if ((z_max < this->v0.z) && (y_max < this->v1.z))
-    //     this->rejected = true;
-
-    // if (this->rejected){
-    //     cout << "rejected\n";
-    //     return;
-    // }
-
     if (visible(d_x, x_min - this->v0.x, t_e, t_l) && visible(-d_x, this->v0.x - x_max, t_e, t_l) &&
         visible(d_y, y_min - this->v0.y, t_e, t_l) && visible(-d_y, this->v0.y - y_max, t_e, t_l) && 
         visible(d_z, z_min - this->v0.z, t_e, t_l) && visible(-d_z, this->v0.z - z_max, t_e, t_l)){
@@ -89,18 +57,158 @@ void Line::clip(double x_min, double x_max, double y_min, double y_max, double z
     }
     else
         this->rejected = true;
+
 }
 
-double Line::f(Vec4 p){
-    Vec4 n(0, this->v0.z-this->v1.z, this->v1.y-this->v0.y, 0, -1);
-    return (p-this->v0).dot(n);
+double Line::f(double x, double y){
+    int x0 = this->v0.x;
+    int y0 = this->v0.y;
+    int x1 = this->v1.x;
+    int y1 = this->v1.y;
+
+    return x * (y0 - y1) + y * (x1- x0) + x0*y1 - y0*x1;
 }
 
 double Line::slope(){
-
-    if (this->v1.x == this->v0.x) return DBL_MAX;
+    if (this->v1.x == this->v0.x){
+        if (this->v1.y > this->v0.y)
+            return DBL_MAX;
+        else
+            return -DBL_MAX;
+    }
 
     return (this->v1.y - this->v0.y) / (this->v1.x - this->v0.x);
+}
+
+void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
+
+    if (this->rejected)
+        return;
+
+    double slope = this->slope();
+
+    this->v0.x = floor(this->v0.x + .5);
+    this->v0.y = floor(this->v0.y + .5);
+
+    this->v1.x = floor(this->v1.x + .5);
+    this->v1.y = floor(this->v1.y + .5);
+
+    if (this->v0.x == n_x)
+        this->v0.x -= 1;
+
+    if (this->v0.y == n_y)
+        this->v0.y -= 1;
+
+    if (this->v1.x == n_x)
+        this->v1.x -= 1;
+    
+    if (this->v1.y == n_y)
+        this->v1.y -= 1;
+
+    int x, y;
+    Color acc = this->v0.color;
+    Color d_color = this->v1.color - this->v0.color;
+
+    if (slope > 0 && slope <= 1){
+        y = this->v0.y; // y = y0
+        d_color = d_color * (1 / ABS(this->v0.x - this->v1.x));
+
+        if (this->v1.y > this->v0.y){   // trivial one
+            for (x = this->v0.x; x <= this->v1.x; x++){
+                image[x][y] = acc; //Color(0, 0, 0);
+
+                if (f(x+1, y+0.5) < 0)
+                    y++;
+
+                acc = acc + d_color;
+            }
+        }
+        else{   // 2nd
+            for (x = this->v0.x; x >= this->v1.x; x--){
+                image[x][y] = acc;  //Color(0, 0, 0);
+
+                if (f(x-1, y-0.5) < 0)
+                    y--;
+
+                acc = acc + d_color;
+            }
+        }
+    }
+    else if (slope > 1 && slope <= DBL_MAX){
+        x = this->v0.x;
+        d_color = d_color * (1 / ABS(this->v0.y - this->v1.y));
+
+        if (this->v1.y > this->v0.y){   // 3rd
+            for (y = this->v0.y; y <= this->v1.y; y++){
+                image[x][y] = acc; //Color(0, 0, 0);
+
+                if (f(x+0.5, y+1) > 0)
+                    x++;
+
+                acc = acc + d_color;
+            }
+        }
+        else{       //4th
+            for (y = this->v0.y; y >= this->v1.y; y--){
+                image[x][y] = acc; //Color(0, 0, 0);
+
+                if (f(x-0.5, y-1) > 0)
+                    x--;
+
+                acc = acc + d_color;
+            }
+        }
+    }
+    else if (slope <= -1){
+        x = this->v0.x;
+        d_color = d_color * (1 / ABS(this->v0.y - this->v1.y));
+
+        if (this->v1.y > this->v0.y){   // 5th
+            for (y = this->v0.y; y <= this->v1.y; y++){
+                image[x][y] = acc; //Color(0, 0, 0);
+
+                if (f(x-0.5, y+1) < 0)
+                    x--;
+
+                acc = acc + d_color;
+            }
+        }
+        else{       // 6th
+            for (y = this->v0.y; y >= this->v1.y; y--){
+                image[x][y] = acc;  //Color(0, 0, 0);
+
+                if (f(x+0.5, y-1) < 0)
+                    x++;
+                
+                acc = acc + d_color;
+            }
+        }
+    }
+    else if (slope > -1){
+        y = this->v0.y;
+        d_color = d_color * (1 / ABS(this->v0.x - this->v1.x));
+
+        if (this->v1.y > this->v0.y){   // 7th
+            for (x = this->v0.x; x >= this->v1.x; x--){
+                image[x][y] = acc;  //Color(0, 0, 0);
+
+                if (f(x-1, y+0.5) > 0)
+                    y++;
+
+                acc = acc + d_color;
+            }
+        }
+        else{   // 8th
+            for (x = this->v0.x; x <= this->v1.x; x++){
+                image[x][y] = acc;  //Color(0, 0, 0);
+
+                if (f(x+1, y-0.5) > 0)
+                    y--;
+
+                acc = acc + d_color;
+            }
+        }
+    }
 }
 
 ostream& operator<<(ostream& os, const Line& line) {

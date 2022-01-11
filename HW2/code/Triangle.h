@@ -18,10 +18,13 @@ public:
     Triangle(const Triangle &other);
 
     void setVertices(vector<Vec3*>& vertices);
+    void setColours(vector<Color*>& colours);
     void setLines();
 
     void clip();
     void applyCulling(Vec4 cam_pos);
+
+    void draw(vector<vector<Color > >&, bool, int, int);
 };
 
 

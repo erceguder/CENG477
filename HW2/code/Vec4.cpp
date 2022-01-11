@@ -27,6 +27,7 @@ Vec4::Vec4(const Vec4 &other){
     this->z = other.z;
     this->w = other.w;
     this->colorId = other.colorId;
+    this->color = other.color;
 }
 
 Vec4::Vec4(Vec3 v, double w){
