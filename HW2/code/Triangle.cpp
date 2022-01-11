@@ -10,6 +10,8 @@ Triangle::Triangle(int vid1, int vid2, int vid3){
     this->vertexIds[0] = vid1;
     this->vertexIds[1] = vid2;
     this->vertexIds[2] = vid3;
+
+    this->culled = false;
 }
 
 Triangle::Triangle(const Triangle &other){
@@ -31,4 +33,13 @@ void Triangle::setLines(){
 void Triangle::clip(){
     for (int i=0; i < 3; i++)
         lines[i].clip();
+}
+
+void Triangle::applyCulling(Vec4 cam_pos){
+    Vec4 eye_vector = this->vertices[0] - cam_pos;
+    
+    Vec4 normal = (this->vertices[1] - this->vertices[0]) * (this->vertices[2] - this->vertices[1]);
+
+    if (normal.dot(eye_vector) > 0)
+        this->culled = true;
 }

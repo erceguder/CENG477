@@ -11,6 +11,7 @@ public:
     int vertexIds[3];
     Vec4 vertices[3];
     Line lines[3];
+    bool culled;
 
     Triangle();
     Triangle(int vid1, int vid2, int vid3);
@@ -20,6 +21,7 @@ public:
     void setLines();
 
     void clip();
+    void applyCulling(Vec4 cam_pos);
 };
 
 
