@@ -22,7 +22,7 @@ public:
     void setLines();
 
     void clip();
-    void applyCulling(Vec4 cam_pos);
+    void applyCulling();
 
     void draw(vector<vector<Color > >&, bool, int, int);
 };
