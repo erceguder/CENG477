@@ -57,13 +57,35 @@ void Triangle::draw(vector<vector<Color > >& image, bool solid, int n_x, int n_y
 
     if (solid){
         // Triangle rasterization
+        for (int i=0; i < 3; i++)
+            this->lines[i].assignPixels(n_x, n_y);
 
-        for (int y=0; y < n_y; y++){
-            for (int x=0; x < n_x; x++){
+        int min_x = this->lines[0].v0.x;
+        int max_x = this->lines[0].v0.x;
+
+        int min_y = this->lines[0].v0.y;
+        int max_y = this->lines[0].v0.y;
+
+        for (int i=1; i < 3; i++){
+            int x_val = this->lines[i].v0.x;
+            int y_val = this->lines[i].v0.y;
+
+            if (min_x > x_val)
+                min_x = x_val;
+
+            if (max_x < x_val)
+                max_x = x_val;
+
+            if (min_y > y_val)
+                min_y = y_val;
+
+            if (max_y < y_val)
+                max_y = y_val;
+        }
+
+        for (int y=min_y; y <= max_y; y++){
+            for (int x=min_x; x <= max_x; x++){
                 double alpha, beta, gamma;
-
-                for (int i=0; i < 3; i++)
-                    this->lines[i].assignPixels(n_x, n_y);
 
                 alpha = lines[1].f(x, y) / lines[1].f(lines[0].v0.x, lines[0].v0.y);
                 beta = lines[2].f(x, y) / lines[2].f(lines[1].v0.x, lines[1].v0.y);

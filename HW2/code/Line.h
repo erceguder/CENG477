@@ -7,6 +7,9 @@
 #include "Vec4.h"
 #include <vector>
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 using namespace std;
 
 class Line{

@@ -28,41 +28,20 @@ void Scene::applyModelingTransformations(Mesh* mesh){
 		int transformation_id = mesh->transformationIds[i];
 		Matrix4 transformation_matrix;
 
-		if (transformatin_type == 't'){
-			// cout << "[translate] t_x: " << translations[transformation_id-1]->tx;
-			// cout << " t_y: " << translations[transformation_id-1]->ty;
-			// cout << " t_z: " << translations[transformation_id-1]->tz << endl;
-			
+		if (transformatin_type == 't')
 			transformation_matrix = translations[transformation_id-1]->getMatrix();
-		}
 
-		else if (transformatin_type == 'r'){
-			// cout << "[rotate] alpha: " << rotations[transformation_id-1]->angle;
-			// cout << " u_x: " << rotations[transformation_id-1]->ux;
-			// cout << " u_y: " << rotations[transformation_id-1]->uy;
-			// cout << " u_z: " << rotations[transformation_id-1]->uz << endl;
-
+		else if (transformatin_type == 'r')
 			transformation_matrix = rotations[transformation_id-1]->getMatrix();
-		}
 
-		else{
-			// cout << "[scale] s_x: " << scalings[transformation_id-1]->sx;
-			// cout << " s_y: " << scalings[transformation_id-1]->sy;
-			// cout << " s_z: " << scalings[transformation_id-1]->sz << endl;
-
+		else
 			transformation_matrix = scalings[transformation_id-1]->getMatrix();
-		}
 
 		for (int j=0; j < mesh->triangle_count; j++){
 			Triangle* triangle = &(mesh->triangles[j]);
 
-			for (int k=0; k < 3; k++){
-				// cout << "\tbefore: " << triangle->vertices[k] << endl;
-
+			for (int k=0; k < 3; k++)
 				triangle->vertices[k] = transformation_matrix * triangle->vertices[k];
-
-				// cout << "\tafter: " << triangle->vertices[k] << endl;
-			}
 		}
 	}
 }
