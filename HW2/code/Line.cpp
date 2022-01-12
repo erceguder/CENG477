@@ -87,23 +87,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
     double slope = this->slope();
 
-    this->v0.x = floor(this->v0.x + .5);
-    this->v0.y = floor(this->v0.y + .5);
-
-    this->v1.x = floor(this->v1.x + .5);
-    this->v1.y = floor(this->v1.y + .5);
-
-    if (this->v0.x == n_x)
-        this->v0.x -= 1;
-
-    if (this->v0.y == n_y)
-        this->v0.y -= 1;
-
-    if (this->v1.x == n_x)
-        this->v1.x -= 1;
-    
-    if (this->v1.y == n_y)
-        this->v1.y -= 1;
+    this->assignPixels(n_x, n_y);
 
     int x, y;
     Color acc = this->v0.color;
@@ -209,6 +193,26 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
             }
         }
     }
+}
+
+void Line::assignPixels(int n_x, int n_y){
+    this->v0.x = floor(this->v0.x + .5);
+    this->v0.y = floor(this->v0.y + .5);
+
+    this->v1.x = floor(this->v1.x + .5);
+    this->v1.y = floor(this->v1.y + .5);
+
+    if (this->v0.x == n_x)
+        this->v0.x -= 1;
+
+    if (this->v0.y == n_y)
+        this->v0.y -= 1;
+
+    if (this->v1.x == n_x)
+        this->v1.x -= 1;
+    
+    if (this->v1.y == n_y)
+        this->v1.y -= 1;
 }
 
 ostream& operator<<(ostream& os, const Line& line) {

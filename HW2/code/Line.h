@@ -20,6 +20,7 @@ public:
     bool visible(double den, double num, double &t_e, double &t_l);
     void clip(double x_min=-1, double x_max=1, double y_min=-1, double y_max=1, double z_min=-1, double z_max=1);
     double f(double x, double y);
+    void assignPixels(int n_x, int n_y);
     double slope();     //infinity???
 
     void draw(vector<vector<Color > >&, int, int);

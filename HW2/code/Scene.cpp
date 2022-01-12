@@ -117,20 +117,20 @@ void Scene::applyPerspectiveDivide(Mesh* mesh){
 
 void Scene::applyClipping(Mesh* mesh){
 	// Single mesh pointer
+	if (mesh->type == 1)
+		return;
 
 	for (int i=0; i < mesh->triangle_count; i++)
 		(mesh->triangles[i]).clip();
 }
 
-void Scene::applyCulling(Mesh* mesh, Camera* camera){
+void Scene::applyCulling(Mesh* mesh){
 	// Single mesh pointer
 	if (!cullingEnabled)
 		return;
 
-	Vec4 cam_pos = Vec4(camera->pos, 1);
-
 	for (int i=0; i < mesh->triangle_count; i++)
-		mesh->triangles[i].applyCulling(cam_pos);
+		mesh->triangles[i].applyCulling();
 }
 
 void Scene::applyViewportTransformation(Mesh* mesh, Camera* camera){
@@ -175,7 +175,7 @@ void Scene::forwardRenderingPipeline(Camera *camera){
 
         applyModelingTransformations(mesh);
         applyCameraTransformations(mesh, camera);
-		applyCulling(mesh, camera);
+		applyCulling(mesh);
         applyProjectionTransformations(mesh, camera);
         applyPerspectiveDivide(mesh);
 

@@ -42,7 +42,7 @@ void Triangle::clip(){
         lines[i].clip();
 }
 
-void Triangle::applyCulling(Vec4 cam_pos){
+void Triangle::applyCulling(){
     Vec4 eye_vector = this->vertices[0];
 
     Vec4 normal = (this->vertices[1] - this->vertices[0]) * (this->vertices[2] - this->vertices[0]);
@@ -57,6 +57,27 @@ void Triangle::draw(vector<vector<Color > >& image, bool solid, int n_x, int n_y
 
     if (solid){
         // Triangle rasterization
+
+        for (int y=0; y < n_y; y++){
+            for (int x=0; x < n_x; x++){
+                double alpha, beta, gamma;
+
+                for (int i=0; i < 3; i++)
+                    this->lines[i].assignPixels(n_x, n_y);
+
+                alpha = lines[1].f(x, y) / lines[1].f(lines[0].v0.x, lines[0].v0.y);
+                beta = lines[2].f(x, y) / lines[2].f(lines[1].v0.x, lines[1].v0.y);
+                gamma = lines[0].f(x, y) / lines[0].f(lines[2].v0.x, lines[2].v0.y);
+
+                if (alpha >= 0 && beta >= 0 && gamma >= 0){
+                    Color color = this->vertices[0].color * alpha;
+                    color = color + this->vertices[1].color * beta;
+                    color = color + this->vertices[2].color * gamma;
+
+                    image[x][y] = color;
+                }
+            }
+        }
     }
     else{
         for (int i=0; i < 3; i++)
