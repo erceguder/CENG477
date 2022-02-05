@@ -84,10 +84,10 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
     if (this->rejected)
         return;
+    
+    this->assignPixels(n_x, n_y);
 
     double slope = this->slope();
-
-    this->assignPixels(n_x, n_y);
 
     int x, y;
     Color acc = this->v0.color;
@@ -99,7 +99,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
         if (this->v1.y > this->v0.y){   // trivial one
             for (x = this->v0.x; x <= this->v1.x; x++){
-                image[x][y] = acc; //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x+1, y+0.5) < 0)
                     y++;
@@ -109,7 +109,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
         }
         else{   // 2nd
             for (x = this->v0.x; x >= this->v1.x; x--){
-                image[x][y] = acc;  //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x-1, y-0.5) < 0)
                     y--;
@@ -124,7 +124,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
         if (this->v1.y > this->v0.y){   // 3rd
             for (y = this->v0.y; y <= this->v1.y; y++){
-                image[x][y] = acc; //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x+0.5, y+1) > 0)
                     x++;
@@ -134,7 +134,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
         }
         else{       //4th
             for (y = this->v0.y; y >= this->v1.y; y--){
-                image[x][y] = acc; //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x-0.5, y-1) > 0)
                     x--;
@@ -149,7 +149,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
         if (this->v1.y > this->v0.y){   // 5th
             for (y = this->v0.y; y <= this->v1.y; y++){
-                image[x][y] = acc; //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x-0.5, y+1) < 0)
                     x--;
@@ -159,7 +159,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
         }
         else{       // 6th
             for (y = this->v0.y; y >= this->v1.y; y--){
-                image[x][y] = acc;  //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x+0.5, y-1) < 0)
                     x++;
@@ -174,7 +174,7 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
 
         if (this->v1.y > this->v0.y){   // 7th
             for (x = this->v0.x; x >= this->v1.x; x--){
-                image[x][y] = acc;  //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x-1, y+0.5) > 0)
                     y++;
@@ -183,8 +183,23 @@ void Line::draw(vector<vector<Color > >& image, int n_x, int n_y){
             }
         }
         else{   // 8th
+            if (slope == 0){
+                if (this->v1.x > this->v0.x)
+                    for (int x = this->v0.x; x <= this->v1.x; x++){
+                        image[x][y] = acc;
+                        acc = acc + d_color;
+                    }
+                else
+                    for (int x = this->v0.x; x >= this->v1.x; x--){
+                        image[x][y] = acc;
+                        acc = acc + d_color;
+                    }
+                    
+                return;
+            }
+
             for (x = this->v0.x; x <= this->v1.x; x++){
-                image[x][y] = acc;  //Color(0, 0, 0);
+                image[x][y] = acc;
 
                 if (f(x+1, y-0.5) > 0)
                     y--;
@@ -202,17 +217,15 @@ void Line::assignPixels(int n_x, int n_y){
     this->v1.x = floor(this->v1.x + .5);
     this->v1.y = floor(this->v1.y + .5);
 
-    if (this->v0.x == n_x)
-        this->v0.x -= 1;
+    this->v0.x = MAX(0, this->v0.x);
+    this->v0.y = MAX(0, this->v0.y);
+    this->v1.x = MAX(0, this->v1.x);
+    this->v1.y = MAX(0, this->v1.y);
 
-    if (this->v0.y == n_y)
-        this->v0.y -= 1;
-
-    if (this->v1.x == n_x)
-        this->v1.x -= 1;
-    
-    if (this->v1.y == n_y)
-        this->v1.y -= 1;
+    this->v0.x = MIN(n_x-1, this->v0.x);
+    this->v0.y = MIN(n_y-1, this->v0.y);
+    this->v1.x = MIN(n_x-1, this->v1.x);
+    this->v1.y = MIN(n_y-1, this->v1.y);
 }
 
 ostream& operator<<(ostream& os, const Line& line) {
