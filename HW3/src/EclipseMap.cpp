@@ -36,9 +36,29 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     initMoonColoredTexture(moonTexturePath, moonShaderID);
 
     
-    // TODO: Set moonVertices
-    
-    // TODO: Configure Buffers
+    // Set moonVertices
+    vector<float> moon_vertices;
+
+    for (int i=0; i <= VERTICAL_SPLIT_COUNT; i++){
+        float beta = PI * i / VERTICAL_SPLIT_COUNT;  // in radians
+        float z = MOON_RADIUS * cos(beta);
+        float tmp = MOON_RADIUS * sin(beta);
+
+        for (int j=0; j <= HORIZONTAL_SPLIT_COUNT; j++){
+            float alpha = 2 * PI * j / HORIZONTAL_SPLIT_COUNT;  // in radians
+
+            moon_vertices.push_back(tmp * cos(alpha));  // x
+            moon_vertices.push_back(tmp * sin(alpha)
+                                    + MOON_INITIAL_Y);  // y
+            moon_vertices.push_back(z);                 // z
+        }
+    }
+    // Configure Buffers
+    GLuint moon_vbo_id;
+    glGenBuffers(1, &moon_vbo_id);
+    glBindBuffer(GL_ARRAY_BUFFER, moon_vbo_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * moon_vertices.size(), 
+                &moon_vertices, GL_STREAM_DRAW);
     
 
     // World commands
@@ -48,9 +68,28 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     initColoredTexture(coloredTexturePath, worldShaderID);
     initGreyTexture(greyTexturePath, worldShaderID);
 
-    // TODO: Set worldVertices
-    
-    // TODO: Configure Buffers
+    // Set worldVertices
+    vector<float> world_vertices;
+
+    for (int i=0; i <= VERTICAL_SPLIT_COUNT; i++){
+        float beta = PI * i / VERTICAL_SPLIT_COUNT;  // in radians
+        float z = EARTH_RADIUS * cos(beta);
+        float tmp = EARTH_RADIUS * sin(beta);
+
+        for (int j=0; j <= HORIZONTAL_SPLIT_COUNT; j++){
+            float alpha = 2 * PI * j / HORIZONTAL_SPLIT_COUNT;  // in radians
+
+            world_vertices.push_back(tmp * cos(alpha));  // x
+            world_vertices.push_back(tmp * sin(alpha));  // y
+            world_vertices.push_back(z);                 // z
+        }
+    }
+    // Configure Buffers
+    GLuint world_vbo_id;
+    glGenBuffers(1, &world_vbo_id);
+    glBindBuffer(GL_ARRAY_BUFFER, world_vbo_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * world_vertices.size(), 
+                &world_vertices, GL_STREAM_DRAW);
     
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
@@ -63,8 +102,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glClearDepth(1.0f);
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-
 
         // TODO: Handle key presses
         handleKeyPress(window);
