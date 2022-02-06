@@ -1,3 +1,5 @@
 src/glm/
 src/hw3
 *.dSYM
+*.vscode
+*.DS_Store
