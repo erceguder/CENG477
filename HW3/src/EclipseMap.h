@@ -6,12 +6,20 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <jpeglib.h>
+#include <math.h>
 
 #include "glm/glm/ext.hpp"
 #include "Shader.h"
 #include "glm/glm/glm.hpp"
 
 #define PI 3.14159265359
+
+#define HORIZONTAL_SPLIT_COUNT 250
+#define VERTICAL_SPLIT_COUNT 125
+#define EARTH_RADIUS 600
+#define MOON_RADIUS 162
+#define MOON_INITIAL_Y 2600
+
 using namespace std;
 
 class EclipseMap {
