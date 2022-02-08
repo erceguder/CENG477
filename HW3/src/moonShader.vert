@@ -31,8 +31,7 @@ out Data
 out vec3 LightVector;// Vector from Vertex to Light;
 out vec3 CameraVector;// Vector from Vertex to Camera;
 
-void main()
-{
+void main(){
     // get orbitDegree value, compute new x, y coordinates
     // there won't be height in moon shader
  
@@ -42,5 +41,5 @@ void main()
     // data.Normal = VertexNormal;
     // data.TexCoord = VertexTex;
     
-    gl_Position = vec4(VertexPosition, 1.0f);//MVP * vec4(VertexPosition, 1.0f);
+    gl_Position = MVP * vec4(VertexPosition, 1.0f);
 }
