@@ -37,9 +37,9 @@ void main(){
  
    // set gl_Position variable correctly to give the transformed vertex position
 
-    // data.Position = (MVP * vec4(VertexPosition, 1.0f)).xyz;
-    // data.Normal = VertexNormal;
-    // data.TexCoord = VertexTex;
+    data.Position = (MVP * vec4(VertexPosition, 1.0f)).xyz;
+    data.Normal = VertexNormal;
+    data.TexCoord = VertexTex;
     
     gl_Position = MVP * vec4(VertexPosition, 1.0f);
 }

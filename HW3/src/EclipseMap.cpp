@@ -82,7 +82,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
             float alpha = j * horizontal_step;  // in radians, [0 , 2pi]
 
             float x = tmp * cos(alpha);
-            float y = tmp * sin(alpha);// + MOON_INITIAL_Y;
+            float y = tmp * sin(alpha) + MOON_INITIAL_Y;
 
             glm::vec3 position(x, y, z);
             glm::vec3 normal = glm::normalize(position - moon_center);
@@ -228,6 +228,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Manipulate rotation variables
         
         // TODO: Bind textures
+        glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, moonTextureColor);
         
         // TODO: Use moonShaderID program
@@ -240,30 +241,34 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
         glm::mat4 proj = glm::perspective(glm::radians(projectionAngle), aspectRatio, near, far);
 
-        glm::mat4 MVP = proj * view;// * model;
+        glm::mat4 MVP = proj * view * model;
 
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 
         // TODO: Bind moon vertex array
         glBindVertexArray(moonVAO);
-        //glBindVertexArray(VAO);
         
         // TODO: Draw moon object
         glDrawElements(GL_TRIANGLES, moon_vertices.size(), GL_UNSIGNED_INT, 0);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /*************************/
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textureColor);
+
         // TODO: Use worldShaderID program
+        glUseProgram(worldShaderID);
         
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
+        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
         
         // TODO: Bind world vertex array
+        glBindVertexArray(VAO);
         
         // TODO: Draw world object
-        
+        glDrawElements(GL_TRIANGLES, earth_vertices.size(), GL_UNSIGNED_INT, 0);
 
         // Swap buffers and poll events
         glfwSwapBuffers(window);
@@ -281,7 +286,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glDeleteBuffers(1, &EBO);
    
     glDeleteProgram(moonShaderID);
-    //glDeleteProgram(worldShaderID);
+    glDeleteProgram(worldShaderID);
 
     // Close window
     glfwTerminate();
@@ -388,10 +393,8 @@ void EclipseMap::initColoredTexture(const char *filename, GLuint shader) {
     height = cinfo.image_height;
     width = cinfo.image_width;
 
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_image);
    
-
     imageWidth = width;
     imageHeight = height;
 
@@ -407,11 +410,9 @@ void EclipseMap::initColoredTexture(const char *filename, GLuint shader) {
     free(row_pointer[0]);
     free(raw_image);
     fclose(infile);
-
 }
 
 void EclipseMap::initGreyTexture(const char *filename, GLuint shader) {
-
     glGenTextures(1, &textureGrey);
     glBindTexture(GL_TEXTURE_2D, textureGrey);
     // set the texture wrapping parameters
@@ -470,9 +471,6 @@ void EclipseMap::initGreyTexture(const char *filename, GLuint shader) {
     width = cinfo.image_width;
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, raw_image);
-  
-
-
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -486,7 +484,6 @@ void EclipseMap::initGreyTexture(const char *filename, GLuint shader) {
     free(row_pointer[0]);
     free(raw_image);
     fclose(infile);
-
 }
 
 void EclipseMap::initMoonColoredTexture(const char *filename, GLuint shader) {

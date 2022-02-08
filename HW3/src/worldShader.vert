@@ -31,19 +31,13 @@ out Data
 out vec3 LightVector;// Vector from Vertex to Light;
 out vec3 CameraVector;// Vector from Vertex to Camera;
 
-void main()
-{
-    
-    // Calculate texture coordinate based on data.TexCoord
-    vec2 textureCoordinate = vec2(0, 0);
-    vec4 texColor = texture(TexGrey, textureCoordinate);
-
+void main(){
     // get texture value, compute height
     // compute normal vector
+    
+    data.Position = (MVP * vec4(VertexPosition, 1.0f)).xyz;
+    data.Normal = VertexNormal;
+    data.TexCoord = VertexTex;
 
-
-   // set gl_Position variable correctly to give the transformed vertex position
-
-
-    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
+    gl_Position = MVP * vec4(VertexPosition, 1.0f);
 }

@@ -27,8 +27,7 @@ vec3 diffuseReflectenceCoefficient= vec3(1.0f);
 vec3 diffuseLightColor = vec3(1.0f);
 
 
-void main()
-{
+void main(){
     // Calculate texture coordinate based on data.TexCoord
     // vec2 textureCoordinate = vec2(0, 0);
     // vec4 texColor = texture(MoonTexColor, textureCoordinate);
@@ -38,5 +37,5 @@ void main()
     // vec3 spec = vec3(0, 0, 0);
 
     //FragColor = vec4(ambient+diffuse+spec, 1.0f);
-    FragColor = vec4(1.0, 1.0, 1.0, 1.0);//texture(MoonTexColor, data.TexCoord);
+    FragColor = texture(MoonTexColor, data.TexCoord);
 }
