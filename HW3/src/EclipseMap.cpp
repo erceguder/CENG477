@@ -82,7 +82,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
             float alpha = j * horizontal_step;  // in radians, [0 , 2pi]
 
             float x = tmp * cos(alpha);
-            float y = tmp * sin(alpha) + MOON_INITIAL_Y;
+            float y = tmp * sin(alpha);// + MOON_INITIAL_Y;
 
             glm::vec3 position(x, y, z);
             glm::vec3 normal = glm::normalize(position - moon_center);
@@ -207,8 +207,9 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    assert(glGetError() == GL_NONE);
     
+    assert(glGetError() == GL_NONE);
+
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
 
@@ -227,7 +228,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Manipulate rotation variables
         
         // TODO: Bind textures
-        //glBindTexture(GL_TEXTURE_2D, moonTextureColor);
+        glBindTexture(GL_TEXTURE_2D, moonTextureColor);
         
         // TODO: Use moonShaderID program
         glUseProgram(moonShaderID);
@@ -239,15 +240,17 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
         glm::mat4 proj = glm::perspective(glm::radians(projectionAngle), aspectRatio, near, far);
 
-        glm::mat4 MVP = proj * view * model;
+        glm::mat4 MVP = proj * view;// * model;
 
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 
         // TODO: Bind moon vertex array
         glBindVertexArray(moonVAO);
+        //glBindVertexArray(VAO);
         
         // TODO: Draw moon object
         glDrawElements(GL_TRIANGLES, moon_vertices.size(), GL_UNSIGNED_INT, 0);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         /*************************/
 
