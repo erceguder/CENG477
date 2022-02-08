@@ -14,10 +14,6 @@
 
 #define PI 3.14159265359
 
-#define HORIZONTAL_SPLIT_COUNT 250
-#define VERTICAL_SPLIT_COUNT 125
-#define EARTH_RADIUS 600
-#define MOON_RADIUS 162
 #define MOON_INITIAL_Y 2600
 
 using namespace std;
@@ -93,7 +89,6 @@ public:
     void initGreyTexture(const char *filename, GLuint shader);
 
     void initMoonColoredTexture(const char *filename, GLuint shader);
-
 };
 
 #endif

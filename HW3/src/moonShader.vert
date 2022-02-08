@@ -28,10 +28,8 @@ out Data
     vec2 TexCoord;
 } data;
 
-
 out vec3 LightVector;// Vector from Vertex to Light;
 out vec3 CameraVector;// Vector from Vertex to Camera;
-
 
 void main()
 {
@@ -40,7 +38,9 @@ void main()
  
    // set gl_Position variable correctly to give the transformed vertex position
 
-
-    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
-
+    // data.Position = (MVP * vec4(VertexPosition, 1.0f)).xyz;
+    // data.Normal = VertexNormal;
+    // data.TexCoord = VertexTex;
+    
+    gl_Position = vec4(VertexPosition, 1.0f);//MVP * vec4(VertexPosition, 1.0f);
 }

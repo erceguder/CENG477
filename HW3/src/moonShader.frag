@@ -6,6 +6,7 @@ in Data
     vec3 Normal;
     vec2 TexCoord;
 } data;
+
 in vec3 LightVector;
 in vec3 CameraVector;
 
@@ -29,13 +30,13 @@ vec3 diffuseLightColor = vec3(1.0f);
 void main()
 {
     // Calculate texture coordinate based on data.TexCoord
-    vec2 textureCoordinate = vec2(0, 0);
-    vec4 texColor = texture(MoonTexColor, textureCoordinate);
+    // vec2 textureCoordinate = vec2(0, 0);
+    // vec4 texColor = texture(MoonTexColor, textureCoordinate);
 
-    vec3 ambient = vec3(0, 0, 0);    
-    vec3 diffuse = vec3(0, 0, 0);
-    vec3 spec = vec3(0, 0, 0);
+    // vec3 ambient = vec3(0, 0, 0);    
+    // vec3 diffuse = vec3(0, 0, 0);
+    // vec3 spec = vec3(0, 0, 0);
 
-    FragColor = vec4(ambient+diffuse+spec, 1.0f);
-
+    //FragColor = vec4(ambient+diffuse+spec, 1.0f);
+    FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 }
