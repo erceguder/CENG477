@@ -235,7 +235,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         moon_model = rotate_around_earth * moon_model;                      // 4. Rotate around earth
 
         glm::mat4 MVP = proj * view * moon_model;
+
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+        glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "ModelingMatrix"), 1, GL_FALSE, glm::value_ptr(moon_model));
+
+        glUniform3fv(glGetUniformLocation(moonShaderID, "lightPosition"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(moonShaderID, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
         glm::vec4 new_position = moon_model * glm::vec4(0.0f, 2600.0f, 0.0f, 1.0f);
         moonX = new_position.x;
@@ -259,7 +264,12 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         MVP = proj * view * earth_model;
         
         glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+        glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "ModelingMatrix"), 1, GL_FALSE, glm::value_ptr(earth_model));
+
         glUniform1f(glGetUniformLocation(worldShaderID, "heightFactor"), heightFactor);
+
+        glUniform3fv(glGetUniformLocation(worldShaderID, "lightPosition"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(worldShaderID, "cameraPosition"), 1, glm::value_ptr(cameraPosition));
 
         // TODO: Bind world vertex array
         glBindVertexArray(VAO);

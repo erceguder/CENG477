@@ -1,11 +1,11 @@
 #version 410
 
-in Data
-{
+in Data{
     vec3 Position;
     vec3 Normal;
     vec2 TexCoord;
 } data;
+
 in vec3 LightVector;
 in vec3 CameraVector;
 
@@ -28,11 +28,19 @@ vec3 diffuseLightColor = vec3(1.0f);
 
 void main(){
     // Calculate texture coordinate based on data.TexCoord
-    // vec4 texColor = texture(TexColor, data.TexCoord);
+    vec4 texColor = texture(TexColor, data.TexCoord);
+    float cos_theta = dot(normalize(data.Normal), LightVector);
 
-    // vec3 ambient = vec3(0, 0, 0);    
-    // vec3 diffuse = vec3(0, 0, 0);
+    if (cos_theta < 0){
+        cos_theta = 0;
+    }
+
+    vec3 ambient = vec3(0.5f, 0.5f, 0.5f);    
+    vec3 diffuse = texColor.xyz * cos_theta * vec3(1.0f);
+
     // vec3 spec = vec3(0, 0, 0);
 
-    FragColor = texture(TexColor, data.TexCoord);
+    //vec3 h = normalize(LightVector + CameraVector);
+
+    FragColor = vec4(diffuse, 1.0f);
 }

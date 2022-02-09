@@ -11,6 +11,7 @@ uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 MVP;
+uniform mat4 ModelingMatrix;
 
 uniform sampler2D TexColor;
 uniform sampler2D TexGrey;
@@ -20,13 +21,11 @@ uniform float heightFactor;
 uniform float imageWidth;
 uniform float imageHeight;
 
-out Data
-{
+out Data{
     vec3 Position;
     vec3 Normal;
     vec2 TexCoord;
 } data;
-
 
 out vec3 LightVector;// Vector from Vertex to Light;
 out vec3 CameraVector;// Vector from Vertex to Camera;
@@ -35,12 +34,16 @@ void main(){
     // get texture value, compute height
     // compute normal vector
     float height = texture(TexGrey, VertexTex).x * heightFactor;
-    vec3 tmp = VertexPosition + VertexNormal * height;
-    vec4 vertex = MVP * vec4(tmp, 1.0f);
+
+    vec4 tmp = vec4(VertexPosition + VertexNormal * height, 1.0f);
+    vec4 vertex = MVP * tmp;
     
-    data.Position = vertex.xyz;
-    data.Normal = VertexNormal;
+    data.Position = (ModelingMatrix * tmp).xyz;
+    data.Normal = (transpose(inverse(ModelingMatrix)) * vec4(VertexNormal, 0.0f) ).xyz;
     data.TexCoord = VertexTex;
+
+    LightVector = normalize(lightPosition - data.Position);
+    CameraVector = normalize(cameraPosition - data.Position);
 
     gl_Position = vertex;
 }

@@ -1,7 +1,6 @@
 #version 410
 
-in Data
-{
+in Data{
     vec3 Position;
     vec3 Normal;
     vec2 TexCoord;

@@ -21,8 +21,7 @@ uniform float heightFactor;
 uniform float imageWidth;
 uniform float imageHeight;
 
-out Data
-{
+out Data{
     vec3 Position;
     vec3 Normal;
     vec2 TexCoord;
