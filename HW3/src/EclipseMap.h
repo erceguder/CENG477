@@ -60,6 +60,9 @@ private:
     int screenWidth = defaultScreenWidth;
     int screenHeight = defaultScreenHeight;
     int displayFormat = displayFormatOptions::windowed;
+
+    float moonX = 0;
+    float moonY = MOON_INITIAL_Y;
     
     // CAMERA SETTINGS
     float projectionAngle = 45;
