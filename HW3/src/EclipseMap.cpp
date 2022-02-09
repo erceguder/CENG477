@@ -157,8 +157,6 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     int frameBufferHeight, frameBufferWidth;
 
     GLFWwindow *window = openWindow(windowName, screenWidth, screenHeight);
-    glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
-
     // Moon commands
     // Load shaders
     GLuint moonShaderID = initShaders("moonShader.vert", "moonShader.frag");
@@ -183,11 +181,13 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
 
-    glm::mat4 model = glm::mat4(1.0);
     glm::mat4 proj = glm::perspective(glm::radians(projectionAngle), aspectRatio, near, far);
+    glm::mat4 moon_model = glm::mat4(1.0f);
+    glm::mat4 earth_model = glm::mat4(1.0f);
 
     // Main rendering loop
     do {
+        glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
         glViewport(0, 0, frameBufferWidth, frameBufferHeight);
 
         glClearStencil(0);
@@ -210,13 +210,26 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
-        // model = glm::translate(model, glm::vec3(0.0f, 5.0f, 5.0f));
-        model = glm::rotate(model, glm::radians(0.5f), glm::vec3(1.0f, 0.0f, 0.0f));
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
 
-        glm::mat4 MVP = proj * view * model;
+        moon_model = glm::rotate(moon_model, glm::radians(0.2f),
+                                glm::vec3(0.0f, 0.0f, 1.0f));   // Last: rotate around world
 
+        // moon_model = glm::translate(moon_model,
+        //                             glm::vec3(moonX, moonY, 0));    // Third: put moon back
+
+        // moon_model = glm::rotate(moon_model, 0.5f/horizontalSplitCount, 
+        //                         glm::vec3(0.0f, 0.0f, 1.0f));       // Second: rotate around z-axis
+
+        // moon_model = glm::translate(moon_model, 
+        //                             glm::vec3(-moonX, -moonY, 0));  // First: put moon to origin
+
+        glm::mat4 MVP = proj * view * moon_model;
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+
+        glm::vec4 center = MVP * glm::vec4(moonX, moonY, 0.0f, 1.0f);
+        moonX = center.x;
+        moonY = center.y;
 
         // TODO: Bind moon vertex array
         glBindVertexArray(moonVAO);
@@ -235,6 +248,9 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
+        earth_model = glm::rotate(earth_model, 0.5f/horizontalSplitCount, glm::vec3(0.0f, 0.0f, 1.0f));
+        MVP = proj * view * earth_model;
+        
         glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 
         // TODO: Bind world vertex array
