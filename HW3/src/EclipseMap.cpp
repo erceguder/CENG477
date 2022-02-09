@@ -223,7 +223,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
 
         // TODO: Update uniform variables at every frame
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
-
+      
         moon_model = glm::translate(glm::mat4(1.0f),
                             glm::vec3(-moonX, -moonY, 0.0f)) * moon_model;  // 1. Move moon to origin
 
@@ -303,6 +303,24 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) { 
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE){
+            
+            const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            if (this->displayFormat == windowed){
+                this->displayFormat = fullScreen;
+
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+            }
+            else {
+                this->displayFormat = windowed;
+
+                glfwSetWindowMonitor(window, NULL, 0, 0, defaultScreenWidth, defaultScreenHeight, mode->refreshRate);
+            }
+        }
+    }   
 }
 
 GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height) {
