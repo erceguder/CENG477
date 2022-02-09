@@ -34,11 +34,13 @@ out vec3 CameraVector;// Vector from Vertex to Camera;
 void main(){
     // get texture value, compute height
     // compute normal vector
-    vec4 tmp = MVP * vec4(VertexPosition, 1.0f);
+    float height = texture(TexGrey, VertexTex).x * heightFactor;
+    vec3 tmp = VertexPosition + VertexNormal * height;
+    vec4 vertex = MVP * vec4(tmp, 1.0f);
     
-    data.Position = vec3(tmp.x/tmp.w, tmp.y/tmp.w, tmp.z/tmp.w);
+    data.Position = vertex.xyz;
     data.Normal = VertexNormal;
     data.TexCoord = VertexTex;
 
-    gl_Position = tmp;
+    gl_Position = vertex;
 }
