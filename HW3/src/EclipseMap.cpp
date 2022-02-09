@@ -212,7 +212,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update uniform variables at every frame
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
 
-        moon_model = glm::rotate(moon_model, glm::radians(0.2f),
+        moon_model = glm::rotate(moon_model, glm::radians(0.5f),
                                 glm::vec3(0.0f, 0.0f, 1.0f));   // Last: rotate around world
 
         // moon_model = glm::translate(moon_model,
@@ -227,7 +227,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         glm::mat4 MVP = proj * view * moon_model;
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 
-        glm::vec4 center = MVP * glm::vec4(moonX, moonY, 0.0f, 1.0f);
+        glm::vec4 center = moon_model * glm::vec4(moonX, moonY, 0.0f, 1.0f);
         moonX = center.x;
         moonY = center.y;
 
@@ -248,7 +248,8 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
-        earth_model = glm::rotate(earth_model, 0.5f/horizontalSplitCount, glm::vec3(0.0f, 0.0f, 1.0f));
+        // earth_model = glm::rotate(earth_model, 0.5f/horizontalSplitCount, glm::vec3(0.0f, 0.0f, 1.0f));
+        earth_model = glm::rotate(earth_model, glm::radians(0.5f), glm::vec3(0.0f, 0.0f, 1.0f));
         MVP = proj * view * earth_model;
         
         glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
@@ -285,6 +286,24 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) { 
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE){
+            
+            const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+            if (this->displayFormat == windowed){
+                this->displayFormat = fullScreen;
+
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+            }
+            else {
+                this->displayFormat = windowed;
+
+                glfwSetWindowMonitor(window, NULL, 0, 0, defaultScreenWidth, defaultScreenHeight, mode->refreshRate);
+            }
+        }
+    }   
 }
 
 GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height) {
