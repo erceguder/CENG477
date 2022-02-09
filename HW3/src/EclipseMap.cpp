@@ -185,6 +185,14 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
     glm::mat4 moon_model = glm::mat4(1.0f);
     glm::mat4 earth_model = glm::mat4(1.0f);
 
+    glm::mat4 rotate_own = glm::rotate(glm::mat4(1.0f),
+                                      glm::radians(360.0f / horizontalSplitCount),
+                                      glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 rotate_around_earth = glm::rotate(glm::mat4(1.0f),
+                                                -glm::radians(1.0f),
+                                                glm::vec3(0.0f, 0.0f, 1.0f));
+
     // Main rendering loop
     do {
         glfwGetFramebufferSize(window, &frameBufferWidth, &frameBufferHeight);
@@ -212,24 +220,22 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update uniform variables at every frame
         glm::mat4 view = glm::lookAt(cameraPosition, cameraPosition+cameraDirection, cameraUp);
 
-        moon_model = glm::rotate(moon_model, glm::radians(0.2f),
-                                glm::vec3(0.0f, 0.0f, 1.0f));   // Last: rotate around world
+        moon_model = glm::translate(glm::mat4(1.0f),
+                            glm::vec3(-moonX, -moonY, 0.0f)) * moon_model;  // 1. Move moon to origin
 
-        // moon_model = glm::translate(moon_model,
-        //                             glm::vec3(moonX, moonY, 0));    // Third: put moon back
+        moon_model = rotate_own * moon_model;                               // 2. Rotate around own axis
 
-        // moon_model = glm::rotate(moon_model, 0.5f/horizontalSplitCount, 
-        //                         glm::vec3(0.0f, 0.0f, 1.0f));       // Second: rotate around z-axis
+        moon_model = glm::translate(glm::mat4(1.0f),
+                            glm::vec3(moonX, moonY, 0.0f)) * moon_model;    // 3. Replace position
 
-        // moon_model = glm::translate(moon_model, 
-        //                             glm::vec3(-moonX, -moonY, 0));  // First: put moon to origin
+        moon_model = rotate_around_earth * moon_model;                      // 4. Rotate around earth
 
         glm::mat4 MVP = proj * view * moon_model;
         glUniformMatrix4fv(glGetUniformLocation(moonShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
 
-        glm::vec4 center = MVP * glm::vec4(moonX, moonY, 0.0f, 1.0f);
-        moonX = center.x;
-        moonY = center.y;
+        glm::vec4 new_position = moon_model * glm::vec4(0.0f, 2600.0f, 0.0f, 1.0f);
+        moonX = new_position.x;
+        moonY = new_position.y;
 
         // TODO: Bind moon vertex array
         glBindVertexArray(moonVAO);
@@ -248,7 +254,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         // TODO: Update camera at every frame
 
         // TODO: Update uniform variables at every frame
-        earth_model = glm::rotate(earth_model, 0.5f/horizontalSplitCount, glm::vec3(0.0f, 0.0f, 1.0f));
+        earth_model = rotate_own * earth_model;
         MVP = proj * view * earth_model;
         
         glUniformMatrix4fv(glGetUniformLocation(worldShaderID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
