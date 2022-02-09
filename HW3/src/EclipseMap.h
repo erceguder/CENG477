@@ -53,10 +53,10 @@ private:
     enum displayFormatOptions {
         windowed = 1, fullScreen = 0
     };
-    
+
     const char *windowName = "Ceng477 - HW3";
-    int defaultScreenWidth = 1000;
-    int defaultScreenHeight = 1000;
+    int defaultScreenWidth = 700;
+    int defaultScreenHeight = 700;
     int screenWidth = defaultScreenWidth;
     int screenHeight = defaultScreenHeight;
     int displayFormat = displayFormatOptions::windowed;
@@ -96,10 +96,8 @@ public:
     float moonImageWidth;
     float moonRadius = 162;
 
-    vector<vertex> earthVertices;
-    vector<vertex> moonVertices;
-    vector<triangle> triangles;
-
+    vector<float> worldVertices;
+    vector<float> moonVertices;
     vector<unsigned int> indices;
 
     GLFWwindow *openWindow(const char *windowName, int width, int height);
@@ -116,6 +114,9 @@ public:
 
     void initMoonBuffers();
     void initEarthBuffers();
+
+    void initIndices();
+    void initVertices();
 };
 
 #endif
