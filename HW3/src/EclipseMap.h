@@ -18,6 +18,29 @@
 
 using namespace std;
 
+struct vertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 texture;
+
+    vertex() {}
+
+    vertex(const glm::vec3 &position, const glm::vec3 &normal, const glm::vec2 &texture) : position(position),
+                                                                                           normal(normal),
+                                                                                           texture(texture) {}
+};
+
+struct triangle {
+    int vertex1;
+    int vertex2;
+    int vertex3;
+
+    triangle() {}
+
+    triangle(const int &vertex1, const int &vertex2, const int &vertex3) : vertex1(vertex1), vertex2(vertex2),
+                                                                           vertex3(vertex3) {}
+};
+
 class EclipseMap {
 private:
     float heightFactor = 80;
@@ -30,9 +53,10 @@ private:
     enum displayFormatOptions {
         windowed = 1, fullScreen = 0
     };
+
     const char *windowName = "Ceng477 - HW3";
-    int defaultScreenWidth = 1000;
-    int defaultScreenHeight = 1000;
+    int defaultScreenWidth = 700;
+    int defaultScreenHeight = 700;
     int screenWidth = defaultScreenWidth;
     int screenHeight = defaultScreenHeight;
     int displayFormat = displayFormatOptions::windowed;
@@ -73,10 +97,8 @@ public:
     float moonRadius = 162;
 
     vector<float> worldVertices;
-    vector<unsigned int> worldIndices;
-
     vector<float> moonVertices;
-    vector<unsigned int> moonIndices;
+    vector<unsigned int> indices;
 
     GLFWwindow *openWindow(const char *windowName, int width, int height);
 
@@ -89,6 +111,12 @@ public:
     void initGreyTexture(const char *filename, GLuint shader);
 
     void initMoonColoredTexture(const char *filename, GLuint shader);
+
+    void initMoonBuffers();
+    void initEarthBuffers();
+
+    void initIndices();
+    void initVertices();
 };
 
 #endif
