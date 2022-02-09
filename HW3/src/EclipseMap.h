@@ -69,8 +69,8 @@ private:
     float aspectRatio = 1;
     float near = 0.1;
     float far = 10000;
-    float startPitch = 180;
-    float startYaw = 90;
+    float startPitch = -45;
+    float startYaw = 270;
     float startSpeed = 0;
     float pitch = startPitch;
     float yaw = startYaw;
@@ -120,6 +120,8 @@ public:
 
     void initIndices();
     void initVertices();
+
+    void updateCamera();
 };
 
 #endif
