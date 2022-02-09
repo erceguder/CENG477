@@ -11,6 +11,7 @@ uniform mat4 ProjectionMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 MVP;
+uniform mat4 ModelingMatrix;
 
 uniform sampler2D TexColor;
 uniform sampler2D TexGrey;
@@ -31,14 +32,15 @@ out vec3 LightVector;// Vector from Vertex to Light;
 out vec3 CameraVector;// Vector from Vertex to Camera;
 
 void main(){
-    // get orbitDegree value, compute new x, y coordinates
-    // there won't be height in moon shader
- 
-   // set gl_Position variable correctly to give the transformed vertex position
+    vec4 tmp = vec4(VertexPosition, 1.0f);
+    vec4 vertex = MVP * tmp;
 
-    data.Position = (MVP * vec4(VertexPosition, 1.0f)).xyz;
-    data.Normal = VertexNormal;
+    data.Position = (ModelingMatrix * tmp).xyz;
+    data.Normal = normalize( (transpose(inverse(ModelingMatrix)) * vec4(VertexNormal, 0.0f)).xyz );
     data.TexCoord = VertexTex;
-    
-    gl_Position = MVP * vec4(VertexPosition, 1.0f);
+
+    LightVector = normalize(lightPosition - data.Position);
+    CameraVector = normalize(cameraPosition - data.Position);
+
+    gl_Position = vertex;
 }

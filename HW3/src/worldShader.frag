@@ -30,7 +30,7 @@ vec3 diffuseLightColor = vec3(1.0f);
 void main(){
     // Calculate texture coordinate based on data.TexCoord
     vec4 texColor = texture(TexColor, data.TexCoord);
-    float cos_theta = dot(normalize(data.Normal), LightVector);
+    float cos_theta = dot(data.Normal, LightVector);
 
     if (cos_theta < 0){
         cos_theta = 0;
@@ -41,7 +41,7 @@ void main(){
 
     vec3 h = normalize(LightVector + CameraVector);
 
-    float cos_alpha = dot(normalize(data.Normal), h);
+    float cos_alpha = dot(data.Normal, h);
 
     if (cos_alpha < 0){
         cos_alpha = 0;

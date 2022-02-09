@@ -17,24 +17,40 @@ uniform float textureOffset;
 
 out vec4 FragColor;
 
-vec3 ambientReflectenceCoefficient = vec3(1.0f);
-vec3 ambientLightColor = vec3(1.0f);
+vec3 ambientReflectenceCoefficient = vec3(0.5f);
+vec3 ambientLightColor = vec3(0.6f);
+
 vec3 specularReflectenceCoefficient= vec3(1.0f);
 vec3 specularLightColor = vec3(1.0f);
-float SpecularExponent = 1;
+float SpecularExponent = 10;
+
 vec3 diffuseReflectenceCoefficient= vec3(1.0f);
 vec3 diffuseLightColor = vec3(1.0f);
 
-
 void main(){
-    // Calculate texture coordinate based on data.TexCoord
-    // vec2 textureCoordinate = vec2(0, 0);
-    // vec4 texColor = texture(MoonTexColor, textureCoordinate);
+    vec4 texColor = texture(MoonTexColor, data.TexCoord);
+    float cos_theta = dot(data.Normal, LightVector);
 
-    // vec3 ambient = vec3(0, 0, 0);    
-    // vec3 diffuse = vec3(0, 0, 0);
-    // vec3 spec = vec3(0, 0, 0);
+    if (cos_theta < 0){
+        cos_theta = 0;
+    }
 
-    //FragColor = vec4(ambient+diffuse+spec, 1.0f);
-    FragColor = texture(MoonTexColor, data.TexCoord);
+    vec3 ambient = ambientReflectenceCoefficient * ambientLightColor;
+    vec3 diffuse = diffuseReflectenceCoefficient * cos_theta * diffuseLightColor;
+
+    vec3 h = normalize(LightVector + CameraVector);
+
+    float cos_alpha = dot(data.Normal, h);
+
+    if (cos_alpha < 0){
+        cos_alpha = 0;
+    }
+
+    cos_alpha = pow(cos_alpha, SpecularExponent);
+
+    vec3 spec = specularReflectenceCoefficient * cos_alpha * specularLightColor;
+
+    vec3 colour = clamp(ambient + diffuse + spec, 0.0f , 255.0f);
+
+    FragColor = texColor * vec4(colour, 1.0f);
 }

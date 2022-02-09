@@ -39,7 +39,7 @@ void main(){
     vec4 vertex = MVP * tmp;
     
     data.Position = (ModelingMatrix * tmp).xyz;
-    data.Normal = (transpose(inverse(ModelingMatrix)) * vec4(VertexNormal, 0.0f) ).xyz;
+    data.Normal = normalize( (transpose(inverse(ModelingMatrix)) * vec4(VertexNormal, 0.0f)).xyz );
     data.TexCoord = VertexTex;
 
     LightVector = normalize(lightPosition - data.Position);

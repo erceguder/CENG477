@@ -364,6 +364,14 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
         this->speed = 0;
     }
 
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        this->heightFactor += 10;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+        this->heightFactor -= 10;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
         this->speed = this->startSpeed;
         this->pitch = this->startPitch;
