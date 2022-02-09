@@ -152,6 +152,17 @@ void EclipseMap::initIndices() {
     }
 }
 
+void EclipseMap::updateCamera() {
+    this->cameraDirection.x = cos(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
+    this->cameraDirection.y = sin(glm::radians(this->pitch));
+    this->cameraDirection.z = sin(glm::radians(this->yaw)) * cos(glm::radians(this->pitch));
+
+    this->cameraPosition += this->cameraDirection * this->speed;
+
+    // glm::vec3 left = this->cameraUp * this->cameraDirection;
+    // this->cameraUp = this->cameraDirection * left;
+}
+
 void EclipseMap::Render(const char *coloredTexturePath, const char *greyTexturePath, const char *moonTexturePath) {
     // Open window
     int frameBufferHeight, frameBufferWidth;
@@ -207,6 +218,7 @@ void EclipseMap::Render(const char *coloredTexturePath, const char *greyTextureP
         handleKeyPress(window);
 
         // TODO: Manipulate rotation variables
+        updateCamera();
 
         // Bind textures
         glActiveTexture(GL_TEXTURE0);
@@ -320,7 +332,48 @@ void EclipseMap::handleKeyPress(GLFWwindow *window) {
                 glfwSetWindowMonitor(window, NULL, 0, 0, defaultScreenWidth, defaultScreenHeight, mode->refreshRate);
             }
         }
-    }   
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        this->yaw += 0.5;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        this->yaw -= 0.5;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        this->pitch += 0.5;
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        this->pitch -= 0.5;
+
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        this->speed += 0.5;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+        this->speed -= 0.5;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+        this->speed = 0;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        this->speed = this->startSpeed;
+        this->pitch = this->startPitch;
+        this->yaw = this->startYaw;
+
+        this->cameraDirection = this->cameraStartDirection;
+        this->cameraPosition = this->cameraStartPosition;
+        this->cameraUp = this->cameraStartUp;
+    }
+
 }
 
 GLFWwindow *EclipseMap::openWindow(const char *windowName, int width, int height) {
